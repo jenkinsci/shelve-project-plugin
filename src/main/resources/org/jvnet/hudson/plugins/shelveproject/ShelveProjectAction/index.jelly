@@ -7,8 +7,7 @@
         <l:main-panel>
             <h1>Shelve ${it.project.name}</h1>
 
-            Shelving a project will backup the project as a tarball and then delete the project from Hudson.
-            This process might take some time so you will be redirected to the main page while we get to work.
+            Shelving a project will backup the project and then delete the project from Hudson.
 
             <div align="right">
                 <form method="post" action="shelveProject">

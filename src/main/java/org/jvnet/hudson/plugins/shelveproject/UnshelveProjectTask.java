@@ -1,6 +1,5 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
-import hudson.model.AbstractProject;
 import hudson.model.Label;
 import hudson.model.Node;
 import hudson.model.Queue;

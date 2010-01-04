@@ -33,14 +33,14 @@ public class UnshelveProjectExecutable
         LOGGER.info( "Unshelving project [" + shelvedProjectDir + "]." );
         try
         {
-            new FilePath( shelvedProjectDir ).untar(
-                new FilePath( new File( Hudson.getInstance().getRootDir(), "jobs" ) ), FilePath.TarCompression.NONE );
+            new FilePath( shelvedProjectDir ).unzip(
+                new FilePath( new File( Hudson.getInstance().getRootDir(), "jobs" ) ) );
             shelvedProjectDir.delete();
             Hudson.getInstance().restart();
         }
         catch ( Exception e )
         {
-            LOGGER.log( Level.SEVERE, "Could not untar project archive [" + shelvedProjectDir + "].", e );
+            LOGGER.log( Level.SEVERE, "Could not unarchive project archive [" + shelvedProjectDir + "].", e );
         }
     }
 

@@ -35,20 +35,20 @@ public class ShelveProjectExecutable
 
     public void run()
     {
-        if ( tarProject() )
+        if ( archiveProject() )
         {
             deleteProject();
         }
     }
 
-    private boolean tarProject()
+    private boolean archiveProject()
     {
-        LOGGER.info( "Creating tar for project [" + project.getName() + "]." );
+        LOGGER.info( "Creating archive for project [" + project.getName() + "]." );
         try
         {
             final File projectRoot = project.getRootDir();
             OutputStream outputStream1 = createOutputStream( Hudson.getInstance().getRootDir(), project.getName() );
-            new FilePath( projectRoot ).tar( outputStream1, new FileFilter()
+            new FilePath( projectRoot ).zip( outputStream1, new FileFilter()
             {
                 public boolean accept( File file )
                 {
@@ -60,7 +60,7 @@ public class ShelveProjectExecutable
         }
         catch ( Exception e )
         {
-            LOGGER.log( Level.SEVERE, "Could not tar project [" + project.getName() + "].", e );
+            LOGGER.log( Level.SEVERE, "Could not archive project [" + project.getName() + "].", e );
             return false;
         }
     }
@@ -70,8 +70,8 @@ public class ShelveProjectExecutable
     {
         final File baseDir = new File( rootDir, "shelvedProjects" );
         baseDir.mkdirs();
-        final File tarball = new File( baseDir, projectName + "-" + System.currentTimeMillis() + ".tar.gz" );
-        return new FileOutputStream( tarball );
+        final File archive = new File( baseDir, projectName + "-" + System.currentTimeMillis() + ".zip" );
+        return new FileOutputStream( archive );
     }
 
     private void deleteProject()

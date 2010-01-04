@@ -1,13 +1,8 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
 import hudson.Extension;
-import hudson.FilePath;
 import hudson.model.Hudson;
-import hudson.model.Item;
-import hudson.model.Items;
 import hudson.model.RootAction;
-import hudson.model.TopLevelItem;
-import hudson.model.User;
 import org.apache.commons.io.FileUtils;
 import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
@@ -20,12 +15,9 @@ import org.kohsuke.stapler.export.ExportedBean;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @ExportedBean(defaultVisibility = 999)
@@ -56,7 +48,7 @@ public class ShelvedProjectsAction
     {
         final File shelvedProjectsDir = new File( Hudson.getInstance().getRootDir(), "shelvedProjects" );
         final Collection<File> shelvedProjectsArchives =
-            FileUtils.listFiles( shelvedProjectsDir, new String[]{"tar.gz"}, false );
+            FileUtils.listFiles( shelvedProjectsDir, new String[]{"zip"}, false );
 
         List<String> projects = new LinkedList<String>();
         for ( File archive : shelvedProjectsArchives )
