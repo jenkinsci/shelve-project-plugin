@@ -46,7 +46,6 @@ public class ShelveProjectExecutable
         LOGGER.info( "Creating tar for project [" + project.getName() + "]." );
         try
         {
-
             final File projectRoot = project.getRootDir();
             OutputStream outputStream1 = createOutputStream( Hudson.getInstance().getRootDir(), project.getName() );
             new FilePath( projectRoot ).tar( outputStream1, new FileFilter()

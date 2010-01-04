@@ -21,7 +21,7 @@
                     </form>
                 </j:when>
                 <j:otherwise>
-                    There are shelved projects.
+                    There are no shelved projects.
                 </j:otherwise>
             </j:choose>
         </l:main-panel>
