@@ -1,0 +1,29 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <l:layout title="Shelved Projects">
+        <l:main-panel>
+            <h1>Shelved Projects</h1>
+
+            <j:set var="shelvedProjectsList" value="${it.shelvedProjects}"/>
+            <j:choose>
+                <j:when test="${!shelvedProjectsList.isEmpty()}">
+                    <form method="post" action="unshelveProject">
+                        <ol>
+                            <j:forEach var="name" items="${shelvedProjectsList}">
+                                <input type="radio" name="project" value="${name}"/>
+                                ${name}
+                            </j:forEach>
+                        </ol>
+
+                        <div align="right">
+                            <input type="submit" value="Unshelve Project" class="submit-button"/>
+                        </div>
+                    </form>
+                </j:when>
+                <j:otherwise>
+                    There are shelved projects.
+                </j:otherwise>
+            </j:choose>
+        </l:main-panel>
+    </l:layout>
+</j:jelly>
