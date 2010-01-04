@@ -6,6 +6,7 @@ import hudson.model.Action;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
+import hudson.model.TopLevelItem;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -31,7 +32,7 @@ public class ShelveProjectProperty
     {
         public boolean isApplicable( Class<? extends Job> jobType )
         {
-            return AbstractProject.class.isAssignableFrom( jobType );
+            return TopLevelItem.class.isAssignableFrom( jobType );
         }
 
         public String getDisplayName()
