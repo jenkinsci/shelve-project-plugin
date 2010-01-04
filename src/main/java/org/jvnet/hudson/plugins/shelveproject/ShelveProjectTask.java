@@ -8,11 +8,10 @@ import hudson.model.ResourceList;
 
 import java.io.IOException;
 
-// TODO: Master/Slave??
 public class ShelveProjectTask
     implements Queue.FlyweightTask, Queue.TransientTask
 {
-    AbstractProject project;
+    private final AbstractProject project;
 
     public ShelveProjectTask( AbstractProject project )
     {
@@ -57,40 +56,7 @@ public class ShelveProjectTask
     public Queue.Executable createExecutable()
         throws IOException
     {
-        // TODO: Extract
-        class ShelveProjectExecutable
-            implements Queue.Executable
-        {
-            private Queue.Task parentTask;
-
-            public ShelveProjectExecutable( Queue.Task parentTask )
-            {
-                this.parentTask = parentTask;
-            }
-
-            public Queue.Task getParent()
-            {
-                return parentTask;
-            }
-
-            public void run()
-            {
-                try
-                {
-                    project.delete();
-                }
-                catch ( IOException e )
-                {
-                    e.printStackTrace();
-                }
-                catch ( InterruptedException e )
-                {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return new ShelveProjectExecutable( this );
+        return new ShelveProjectExecutable( this, project );
     }
 
     public void checkAbortPermission()

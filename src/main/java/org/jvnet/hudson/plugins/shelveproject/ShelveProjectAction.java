@@ -37,7 +37,6 @@ public class ShelveProjectAction
 
     public String getUrlName()
     {
-        // TODO: Permissions
         return "shelve";
     }
 
