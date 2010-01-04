@@ -9,9 +9,9 @@
                 <j:when test="${!shelvedProjectsList.isEmpty()}">
                     <form method="post" action="unshelveProject">
                         <ol>
-                            <j:forEach var="name" items="${shelvedProjectsList}">
-                                <input type="radio" name="project" value="${name}"/>
-                                ${name}
+                            <j:forEach var="shelvedProject" items="${shelvedProjectsList}">
+                                <input type="radio" name="project" value="${shelvedProject.archive}"/>
+                                ${shelvedProject.projectName} (archived on ${shelvedProject.timestamp})
                             </j:forEach>
                         </ol>
 

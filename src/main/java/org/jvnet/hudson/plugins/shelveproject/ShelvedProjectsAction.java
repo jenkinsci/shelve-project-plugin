@@ -4,6 +4,7 @@ import hudson.Extension;
 import hudson.model.Hudson;
 import hudson.model.RootAction;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.QueryParameter;
@@ -44,18 +45,27 @@ public class ShelvedProjectsAction
 
     @SuppressWarnings({"unchecked"})
     @Exported
-    public List<String> getShelvedProjects()
+    public List<ShelvedProject> getShelvedProjects()
     {
         final File shelvedProjectsDir = new File( Hudson.getInstance().getRootDir(), "shelvedProjects" );
         final Collection<File> shelvedProjectsArchives =
             FileUtils.listFiles( shelvedProjectsDir, new String[]{"zip"}, false );
 
-        List<String> projects = new LinkedList<String>();
+        List<ShelvedProject> projects = new LinkedList<ShelvedProject>();
         for ( File archive : shelvedProjectsArchives )
         {
-            projects.add( archive.getAbsolutePath() );
+            projects.add( getShelvedProjectFromArchive( archive ) );
         }
         return projects;
+    }
+
+    private ShelvedProject getShelvedProjectFromArchive( File archive )
+    {
+        ShelvedProject shelvedProject = new ShelvedProject();
+        shelvedProject.setProjectName( StringUtils.substringBefore( archive.getName(), "-" ) );
+        shelvedProject.setTimestamp( Long.valueOf( StringUtils.substringBetween( archive.getName(), "-", "." ) ) );
+        shelvedProject.setArchive( archive );
+        return shelvedProject;
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
@@ -64,8 +74,8 @@ public class ShelvedProjectsAction
         throws IOException, ServletException
     {
         LOGGER.info( "Unshelving archived project [" + project + "]." );
-         // Unshelving the project could take some time, so add it as a task
-         Hudson.getInstance().getQueue().schedule( new UnshelveProjectTask( new File(project) ), 0 );
+        // Unshelving the project could take some time, so add it as a task
+        Hudson.getInstance().getQueue().schedule( new UnshelveProjectTask( new File( project ) ), 0 );
 
         return createRedirectToMainPage();
     }
