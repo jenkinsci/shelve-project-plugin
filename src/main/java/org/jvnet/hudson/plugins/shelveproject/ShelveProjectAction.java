@@ -3,6 +3,7 @@ package org.jvnet.hudson.plugins.shelveproject;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Hudson;
+import hudson.security.Permission;
 import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
 
@@ -27,7 +28,14 @@ public class ShelveProjectAction
 
     public String getIconFileName()
     {
-        return "edit-delete.gif";
+        if ( Hudson.getInstance().hasPermission( Permission.DELETE ) )
+        {
+            return "edit-delete.gif";
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public String getDisplayName()
@@ -54,6 +62,7 @@ public class ShelveProjectAction
     public HttpResponse doShelveProject()
         throws IOException, ServletException
     {
+        Hudson.getInstance().checkPermission( Permission.DELETE );
         if ( !isShelvingProject() )
         {
             LOGGER.info( "Shelving project [" + getProject().getName() + "]." );

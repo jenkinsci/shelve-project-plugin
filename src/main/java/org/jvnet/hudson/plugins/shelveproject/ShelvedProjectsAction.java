@@ -3,6 +3,7 @@ package org.jvnet.hudson.plugins.shelveproject;
 import hudson.Extension;
 import hudson.model.Hudson;
 import hudson.model.RootAction;
+import hudson.security.Permission;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.HttpRedirect;
@@ -32,7 +33,14 @@ public class ShelvedProjectsAction
 
     public String getIconFileName()
     {
-        return "edit-delete.gif";
+        if ( Hudson.getInstance().hasPermission( Permission.CREATE ) )
+        {
+            return "edit-delete.gif";
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public String getDisplayName()
@@ -49,6 +57,8 @@ public class ShelvedProjectsAction
     @Exported
     public List<ShelvedProject> getShelvedProjects()
     {
+        Hudson.getInstance().checkPermission( Permission.CREATE );
+
         final File shelvedProjectsDir = new File( Hudson.getInstance().getRootDir(), "shelvedProjects" );
         shelvedProjectsDir.mkdirs();
 
@@ -79,6 +89,8 @@ public class ShelvedProjectsAction
                                            StaplerResponse response )
         throws IOException, ServletException
     {
+        Hudson.getInstance().checkPermission( Permission.CREATE );
+
         LOGGER.info( "Unshelving archived project [" + project + "]." );
         // Unshelving the project could take some time, so add it as a task
         Hudson.getInstance().getQueue().schedule( new UnshelveProjectTask( new File( project ) ), 0 );
