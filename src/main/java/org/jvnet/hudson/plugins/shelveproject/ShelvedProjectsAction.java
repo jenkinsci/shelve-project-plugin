@@ -48,6 +48,8 @@ public class ShelvedProjectsAction
     public List<ShelvedProject> getShelvedProjects()
     {
         final File shelvedProjectsDir = new File( Hudson.getInstance().getRootDir(), "shelvedProjects" );
+        shelvedProjectsDir.mkdirs();
+
         final Collection<File> shelvedProjectsArchives =
             FileUtils.listFiles( shelvedProjectsDir, new String[]{"zip"}, false );
 
