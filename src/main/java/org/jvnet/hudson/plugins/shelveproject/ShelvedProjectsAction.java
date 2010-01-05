@@ -66,8 +66,9 @@ public class ShelvedProjectsAction
     private ShelvedProject getShelvedProjectFromArchive( File archive )
     {
         ShelvedProject shelvedProject = new ShelvedProject();
-        shelvedProject.setProjectName( StringUtils.substringBefore( archive.getName(), "-" ) );
-        shelvedProject.setTimestamp( Long.valueOf( StringUtils.substringBetween( archive.getName(), "-", "." ) ) );
+        shelvedProject.setProjectName( StringUtils.substringBeforeLast( archive.getName(), "-" ) );
+        shelvedProject.setTimestamp( Long.valueOf(
+            StringUtils.substringBefore( StringUtils.substringAfterLast( archive.getName(), "-" ), "." ) ) );
         shelvedProject.setArchive( archive );
         shelvedProject.setFormatedDate( formatDate( shelvedProject.getTimestamp() ) );
         return shelvedProject;

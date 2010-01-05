@@ -68,4 +68,18 @@ public class ShelvedProjectsActionTest
 
         assertEquals( "Should have found two archived projects.", 2, shelvedProjects.size() );
     }
+
+    public void testGetShelvedProjects_shouldHandleProjectNamesWithHyphens()
+        throws IOException
+    {
+        FileUtils.touch( new File( shelvedProjectsDir, "appreture-science-1262634014828.zip" ) );
+
+        List<ShelvedProject> shelvedProjects = shelvedProjectsAction.getShelvedProjects();
+
+        assertEquals( "Should have found two archived projects.", 1, shelvedProjects.size() );
+        assertEquals( "Should have correctly gotten project name, even one with hypens.", "appreture-science",
+                      shelvedProjects.get( 0 ).getProjectName() );
+        assertEquals( "Should have correctly gotten timestamp, even when project name has hypens.", 1262634014828L,
+                      shelvedProjects.get( 0 ).getTimestamp() );
+    }
 }
