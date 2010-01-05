@@ -10,6 +10,8 @@ public class ShelvedProject
 
     private long timestamp;
 
+    private String formatedDate;
+
     public String getProjectName()
     {
         return projectName;
@@ -40,4 +42,13 @@ public class ShelvedProject
         this.timestamp = timestamp;
     }
 
+    public String getFormatedDate()
+    {
+        return formatedDate;
+    }
+
+    public void setFormatedDate( String formatedDate )
+    {
+        this.formatedDate = formatedDate;
+    }
 }

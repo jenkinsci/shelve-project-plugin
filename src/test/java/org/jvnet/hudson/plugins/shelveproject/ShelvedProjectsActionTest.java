@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+@SuppressWarnings({"ResultOfMethodCallIgnored"})
 public class ShelvedProjectsActionTest
     extends HudsonTestCase
 {
@@ -54,6 +55,7 @@ public class ShelvedProjectsActionTest
                       shelvedProjects.get( 0 ).getTimestamp() );
         assertEquals( "Should have found one archived projects.", "blackMesaProject-1262634114828.zip",
                       shelvedProjects.get( 0 ).getArchive().getName() );
+        assertNotNull( "Should have set formatted date.", shelvedProjects.get( 0 ).getFormatedDate() );
     }
 
     public void testGetShelvedProjects_shouldReturnMultipleArchivedProjects()

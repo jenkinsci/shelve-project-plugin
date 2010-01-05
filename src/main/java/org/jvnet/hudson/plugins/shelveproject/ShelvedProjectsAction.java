@@ -16,7 +16,9 @@ import org.kohsuke.stapler.export.ExportedBean;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -67,6 +69,7 @@ public class ShelvedProjectsAction
         shelvedProject.setProjectName( StringUtils.substringBefore( archive.getName(), "-" ) );
         shelvedProject.setTimestamp( Long.valueOf( StringUtils.substringBetween( archive.getName(), "-", "." ) ) );
         shelvedProject.setArchive( archive );
+        shelvedProject.setFormatedDate( formatDate( shelvedProject.getTimestamp() ) );
         return shelvedProject;
     }
 
@@ -80,6 +83,12 @@ public class ShelvedProjectsAction
         Hudson.getInstance().getQueue().schedule( new UnshelveProjectTask( new File( project ) ), 0 );
 
         return createRedirectToMainPage();
+    }
+
+    public String formatDate( long timestamp )
+    {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "EEE, d MMM yyyy HH:mm:ss Z" );
+        return simpleDateFormat.format( new Date( timestamp ) );
     }
 
     private HttpRedirect createRedirectToMainPage()
