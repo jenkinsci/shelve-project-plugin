@@ -11,7 +11,7 @@
                         <ol>
                             <j:forEach var="shelvedProject" items="${shelvedProjectsList}">
                                 <input type="radio" name="project" value="${shelvedProject.archive}"/>
-                                ${shelvedProject.projectName} (archived on ${shelvedProject.formatedDate})
+                                ${shelvedProject.projectName} (archived on ${shelvedProject.formatedDate})<br/> 
                             </j:forEach>
                         </ol>
 
