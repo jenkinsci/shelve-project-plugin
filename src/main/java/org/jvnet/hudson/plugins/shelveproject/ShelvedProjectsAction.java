@@ -50,7 +50,7 @@ public class ShelvedProjectsAction
 
     public String getUrlName()
     {
-        return "shelvedProjects";
+        return "/shelvedProjects";
     }
 
     @SuppressWarnings({"unchecked"})
