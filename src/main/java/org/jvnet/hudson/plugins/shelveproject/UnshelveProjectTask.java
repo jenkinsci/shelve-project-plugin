@@ -4,6 +4,7 @@ import hudson.model.Label;
 import hudson.model.Node;
 import hudson.model.Queue;
 import hudson.model.ResourceList;
+import hudson.model.queue.CauseOfBlockage;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +36,10 @@ public class UnshelveProjectTask
 
     public String getWhyBlocked()
     {
+        return null;
+    }
+
+    public CauseOfBlockage getCauseOfBlockage() {
         return null;
     }
 

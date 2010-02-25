@@ -36,7 +36,7 @@ public class UnshelveProjectExecutable
             new FilePath( shelvedProjectDir ).unzip(
                 new FilePath( new File( Hudson.getInstance().getRootDir(), "jobs" ) ) );
             shelvedProjectDir.delete();
-            Hudson.getInstance().restart();
+            Hudson.getInstance().reload();
         }
         catch ( Exception e )
         {

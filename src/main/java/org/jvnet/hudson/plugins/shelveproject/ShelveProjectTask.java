@@ -1,10 +1,7 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
-import hudson.model.AbstractProject;
-import hudson.model.Label;
-import hudson.model.Node;
-import hudson.model.Queue;
-import hudson.model.ResourceList;
+import hudson.model.*;
+import hudson.model.queue.CauseOfBlockage;
 
 import java.io.IOException;
 
@@ -30,12 +27,16 @@ public class ShelveProjectTask
 
     public boolean isBuildBlocked()
     {
-        return project.isBuilding();
+        return project.isBuildBlocked();
     }
 
     public String getWhyBlocked()
     {
-        return "Project [" + project.getName() + "] is building.";
+        return project.getWhyBlocked();
+    }
+
+    public CauseOfBlockage getCauseOfBlockage() {
+        return project.getCauseOfBlockage();
     }
 
     public String getName()
