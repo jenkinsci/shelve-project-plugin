@@ -4,6 +4,10 @@
         <l:main-panel>
             <h1>Shelved Projects</h1>
 
+            <p>Hudson's configuration will be reloaded automatically when unshelving a project (this will not impact
+                any running jobs). You may need to reload your browser to see the project restored.</p>
+            
+            <p>
             <j:set var="shelvedProjectsList" value="${it.shelvedProjects}"/>
             <j:choose>
                 <j:when test="${!shelvedProjectsList.isEmpty()}">
@@ -24,6 +28,8 @@
                     There are no shelved projects.
                 </j:otherwise>
             </j:choose>
+            </p>
+            
         </l:main-panel>
     </l:layout>
 </j:jelly>
