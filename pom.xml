@@ -11,7 +11,7 @@
   <groupId>org.jvnet.hudson.plugins</groupId>
   <artifactId>shelve-project-plugin</artifactId>
   <name>Shelve Project Plugin</name>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.3</version>
   <packaging>hpi</packaging>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Shelve+Project+Plugin</url>
 
@@ -37,4 +37,10 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <scm>
+    <connection>scm:svn:https://guest@svn.dev.java.net/svn/hudson/tags/shelve-project-plugin-0.3</connection>
+    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/shelve-project-plugin-0.3</developerConnection>
+    <url>https://hudson.dev.java.net/source/browse/hudson/tags/shelve-project-plugin-0.3</url>
+  </scm>
 </project>
