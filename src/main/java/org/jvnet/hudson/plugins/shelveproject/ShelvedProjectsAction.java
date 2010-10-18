@@ -35,7 +35,7 @@ public class ShelvedProjectsAction
     {
         if ( Hudson.getInstance().hasPermission( Permission.CREATE ) )
         {
-            return "edit-delete.gif";
+            return "/plugin/shelve-project-plugin/icons/shelve-project-icon.png";
         }
         else
         {
