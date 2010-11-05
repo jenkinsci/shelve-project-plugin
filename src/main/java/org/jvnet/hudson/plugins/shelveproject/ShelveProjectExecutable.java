@@ -41,6 +41,11 @@ public class ShelveProjectExecutable
         }
     }
 
+    public long getEstimatedDuration()
+    {
+        return -1; // impossible to estimate duration
+    }
+
     private boolean archiveProject()
     {
         LOGGER.info( "Creating archive for project [" + project.getName() + "]." );

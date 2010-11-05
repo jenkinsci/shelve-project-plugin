@@ -2,8 +2,12 @@ package org.jvnet.hudson.plugins.shelveproject;
 
 import hudson.model.*;
 import hudson.model.queue.CauseOfBlockage;
+import hudson.model.queue.SubTask;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ShelveProjectTask
     implements Queue.FlyweightTask, Queue.TransientTask
@@ -60,6 +64,16 @@ public class ShelveProjectTask
         return new ShelveProjectExecutable( this, project );
     }
 
+    public Queue.Task getOwnerTask()
+    {
+        return null;
+    }
+
+    public Object getSameNodeConstraint()
+    {
+        return null;
+    }
+
     public void checkAbortPermission()
     {
         project.checkAbortPermission();
@@ -73,6 +87,18 @@ public class ShelveProjectTask
     public String getUrl()
     {
         return project.getUrl();
+    }
+
+    public boolean isConcurrentBuild()
+    {
+        return false;
+    }
+
+    public Collection<? extends SubTask> getSubTasks()
+    {
+        final List<SubTask> subTasks = new LinkedList<SubTask>();
+        subTasks.add(this);
+        return subTasks;
     }
 
     public ResourceList getResourceList()

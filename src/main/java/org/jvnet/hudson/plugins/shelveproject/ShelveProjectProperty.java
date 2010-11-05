@@ -10,6 +10,10 @@ import hudson.model.TopLevelItem;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * Necessary so {@link ShelveProjectAction} can be added to the project,
  * which in turn displays a link on the project page.
@@ -20,9 +24,11 @@ public class ShelveProjectProperty
     extends JobProperty<AbstractProject<?, ?>>
 {
     @Override
-    public Action getJobAction( AbstractProject<?, ?> job )
+    public Collection<? extends Action> getJobActions(AbstractProject<?, ?> job)
     {
-        return new ShelveProjectAction( job );
+        final List<Action> actions = new LinkedList<Action>();
+        actions.add(new ShelveProjectAction( job ));
+        return actions;
     }
 
     @SuppressWarnings({"UnusedDeclaration"})

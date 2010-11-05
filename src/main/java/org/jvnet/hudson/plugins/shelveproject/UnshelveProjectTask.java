@@ -5,9 +5,13 @@ import hudson.model.Node;
 import hudson.model.Queue;
 import hudson.model.ResourceList;
 import hudson.model.queue.CauseOfBlockage;
+import hudson.model.queue.SubTask;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 public class UnshelveProjectTask
     implements Queue.FlyweightTask, Queue.TransientTask
@@ -64,6 +68,16 @@ public class UnshelveProjectTask
         return new UnshelveProjectExecutable( this, shelvedProjectDir );
     }
 
+    public Queue.Task getOwnerTask()
+    {
+        return null;
+    }
+
+    public Object getSameNodeConstraint()
+    {
+        return null;
+    }
+
     public void checkAbortPermission()
     {
     }
@@ -76,6 +90,18 @@ public class UnshelveProjectTask
     public String getUrl()
     {
         return null;
+    }
+
+    public boolean isConcurrentBuild()
+    {
+        return false;
+    }
+
+    public Collection<? extends SubTask> getSubTasks()
+    {
+        final List<SubTask> subTasks = new LinkedList<SubTask>();
+        subTasks.add(this);
+        return subTasks;
     }
 
     public ResourceList getResourceList()

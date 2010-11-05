@@ -44,6 +44,11 @@ public class UnshelveProjectExecutable
         }
     }
 
+    public long getEstimatedDuration()
+    {
+        return -1; // impossible to estimate duration
+    }
+
     @Override
     public String toString()
     {
