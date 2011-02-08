@@ -7,7 +7,7 @@
         <l:main-panel>
             <h1>Shelve ${it.project.name}</h1>
 
-            Shelving a project will backup the project and then delete the project from Hudson.
+            Shelving a project will backup the project and then delete the project from Jenkins.
 
             <div align="right">
                 <form method="post" action="shelveProject">

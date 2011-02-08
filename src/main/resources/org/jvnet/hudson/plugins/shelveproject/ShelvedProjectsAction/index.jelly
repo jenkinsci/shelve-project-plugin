@@ -4,7 +4,7 @@
         <l:main-panel>
             <h1>Shelved Projects</h1>
 
-            <p>Hudson's configuration will be reloaded automatically when unshelving a project (this will not impact
+            <p>Jenkins' configuration will be reloaded automatically when unshelving a project (this will not impact
                 any running jobs). You may need to reload your browser to see the project restored.</p>
             
             <p>
