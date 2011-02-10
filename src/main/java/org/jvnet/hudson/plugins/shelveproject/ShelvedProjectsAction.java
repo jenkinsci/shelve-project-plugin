@@ -17,8 +17,11 @@ import org.kohsuke.stapler.export.ExportedBean;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
+import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,7 +73,23 @@ public class ShelvedProjectsAction
         {
             projects.add( getShelvedProjectFromArchive( archive ) );
         }
+
+        sortProjectsAlphabetically(projects);
+
         return projects;
+    }
+
+    private void sortProjectsAlphabetically(final List<ShelvedProject> projects)
+    {
+        final Collator collator = Collator.getInstance();
+
+        Collections.sort(projects, new Comparator<ShelvedProject>()
+        {
+            public int compare(ShelvedProject project1, ShelvedProject project2)
+            {
+                return collator.compare(project1.getProjectName(), project2.getProjectName());
+            }
+        });
     }
 
     private ShelvedProject getShelvedProjectFromArchive( File archive )

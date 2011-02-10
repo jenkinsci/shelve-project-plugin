@@ -82,4 +82,30 @@ public class ShelvedProjectsActionTest
         assertEquals( "Should have correctly gotten timestamp, even when project name has hypens.", 1262634014828L,
                       shelvedProjects.get( 0 ).getTimestamp() );
     }
+
+    public void testGetShelvedProjects_shouldSortProjectsByName()
+            throws IOException
+    {
+        FileUtils.touch( new File( shelvedProjectsDir, "bbb-1111111111111.zip" ) );
+        FileUtils.touch( new File( shelvedProjectsDir, "~aa-1111111111111.zip" ) );
+        FileUtils.touch( new File( shelvedProjectsDir, "!aa-1111111111111.zip" ) );
+        FileUtils.touch( new File( shelvedProjectsDir, "YYY-1111111111111.zip" ) );
+        FileUtils.touch( new File( shelvedProjectsDir, "zzz-1111111111111.zip" ) );
+        FileUtils.touch( new File( shelvedProjectsDir, "aaa-1111111111111.zip" ) );
+
+        List<ShelvedProject> shelvedProjects = shelvedProjectsAction.getShelvedProjects();
+
+        assertEquals( "Project list should have been sorted alphabetically.",
+                "!aa", shelvedProjects.get(0).getProjectName() );
+        assertEquals( "Project list should have been sorted alphabetically.",
+                "~aa", shelvedProjects.get(1).getProjectName() );
+        assertEquals( "Project list should have been sorted alphabetically.",
+                "aaa", shelvedProjects.get(2).getProjectName() );
+        assertEquals( "Project list should have been sorted alphabetically.",
+                "bbb", shelvedProjects.get(3).getProjectName() );
+        assertEquals( "Project list should have been sorted alphabetically.",
+                "YYY", shelvedProjects.get(4).getProjectName() );
+        assertEquals( "Project list should have been sorted alphabetically.",
+                "zzz", shelvedProjects.get(5).getProjectName() );
+    }
 }
