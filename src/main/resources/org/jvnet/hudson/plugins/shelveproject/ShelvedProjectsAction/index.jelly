@@ -14,7 +14,7 @@
                     <form method="post" action="unshelveProject">
                         <ol>
                             <j:forEach var="shelvedProject" items="${shelvedProjectsList}">
-                                <input type="radio" name="project" value="${shelvedProject.archive}"/>
+                                <input type="checkbox" name="projects" value="${shelvedProject.archive}"/>
                                 ${shelvedProject.projectName} (archived on ${shelvedProject.formatedDate})<br/> 
                             </j:forEach>
                         </ol>

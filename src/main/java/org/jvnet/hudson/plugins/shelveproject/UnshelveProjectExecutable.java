@@ -13,14 +13,14 @@ public class UnshelveProjectExecutable
 {
     private final static Logger LOGGER = Logger.getLogger( UnshelveProjectExecutable.class.getName() );
 
-    private final File shelvedProjectDir;
+    private final String[] shelvedProjectDirs;
 
     private final Queue.Task parentTask;
 
-    public UnshelveProjectExecutable( Queue.Task parentTask, File shelvedProjectDir )
+    public UnshelveProjectExecutable( Queue.Task parentTask, String[] shelvedProjectDirs )
     {
         this.parentTask = parentTask;
-        this.shelvedProjectDir = shelvedProjectDir;
+        this.shelvedProjectDirs = shelvedProjectDirs;
     }
 
     public Queue.Task getParent()
@@ -30,17 +30,21 @@ public class UnshelveProjectExecutable
 
     public void run()
     {
-        LOGGER.info( "Unshelving project [" + shelvedProjectDir + "]." );
-        try
+        for (String shelvedProjectDirString : shelvedProjectDirs)
         {
-            new FilePath( shelvedProjectDir ).unzip(
-                new FilePath( new File( Hudson.getInstance().getRootDir(), "jobs" ) ) );
-            shelvedProjectDir.delete();
-            Hudson.getInstance().reload();
-        }
-        catch ( Exception e )
-        {
-            LOGGER.log( Level.SEVERE, "Could not unarchive project archive [" + shelvedProjectDir + "].", e );
+            final File shelvedProjectDir = new File(shelvedProjectDirString);
+            LOGGER.info( "Unshelving project [" + shelvedProjectDir + "]." );
+            try
+            {
+                new FilePath( shelvedProjectDir ).unzip(
+                    new FilePath( new File( Hudson.getInstance().getRootDir(), "jobs" ) ) );
+                shelvedProjectDir.delete();
+                Hudson.getInstance().reload();
+            }
+            catch ( Exception e )
+            {
+                LOGGER.log( Level.SEVERE, "Could not unarchive project archive [" + shelvedProjectDir + "].", e );
+            }
         }
     }
 

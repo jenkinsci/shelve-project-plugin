@@ -1,6 +1,7 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
 import hudson.Extension;
+import hudson.model.Failure;
 import hudson.model.Hudson;
 import hudson.model.RootAction;
 import hudson.security.Permission;
@@ -8,7 +9,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
-import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
@@ -104,15 +104,21 @@ public class ShelvedProjectsAction
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
-    public HttpResponse doUnshelveProject( @QueryParameter(required = true) String project, StaplerRequest request,
+    public HttpResponse doUnshelveProject( StaplerRequest request,
                                            StaplerResponse response )
         throws IOException, ServletException
     {
         Hudson.getInstance().checkPermission( Permission.CREATE );
 
-        LOGGER.info( "Unshelving archived project [" + project + "]." );
+        final String[] projects = request.getParameterValues("projects");
+        if (projects == null)
+        {
+            return createRedirectToShelvedProjectsPage();
+        }
+
+        LOGGER.info("Unshelving archived projects.");
         // Unshelving the project could take some time, so add it as a task
-        Hudson.getInstance().getQueue().schedule( new UnshelveProjectTask( new File( project ) ), 0 );
+        Hudson.getInstance().getQueue().schedule( new UnshelveProjectTask( projects ), 0 );
 
         return createRedirectToMainPage();
     }
@@ -121,6 +127,11 @@ public class ShelvedProjectsAction
     {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "EEE, d MMM yyyy HH:mm:ss Z" );
         return simpleDateFormat.format( new Date( timestamp ) );
+    }
+
+    private HttpResponse createRedirectToShelvedProjectsPage()
+    {
+        return new HttpRedirect( Hudson.getInstance().getRootUrl() + this.getUrlName() );
     }
 
     private HttpRedirect createRedirectToMainPage()
