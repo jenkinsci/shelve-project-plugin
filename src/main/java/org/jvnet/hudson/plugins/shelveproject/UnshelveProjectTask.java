@@ -7,7 +7,6 @@ import hudson.model.ResourceList;
 import hudson.model.queue.CauseOfBlockage;
 import hudson.model.queue.SubTask;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -16,11 +15,11 @@ import java.util.List;
 public class UnshelveProjectTask
     implements Queue.FlyweightTask, Queue.TransientTask
 {
-    private final File shelvedProjectDir;
+    private final String[] shelvedProjectArchiveNames;
 
-    public UnshelveProjectTask( File shelvedProjectDir )
+    public UnshelveProjectTask( String[] shelvedProjectArchiveNames)
     {
-        this.shelvedProjectDir = shelvedProjectDir;
+        this.shelvedProjectArchiveNames = shelvedProjectArchiveNames;
     }
 
     public Label getAssignedLabel()
@@ -65,7 +64,7 @@ public class UnshelveProjectTask
     public Queue.Executable createExecutable()
         throws IOException
     {
-        return new UnshelveProjectExecutable( this, shelvedProjectDir );
+        return new UnshelveProjectExecutable( this, shelvedProjectArchiveNames);
     }
 
     public Queue.Task getOwnerTask()
