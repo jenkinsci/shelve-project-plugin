@@ -37,10 +37,19 @@ public class UnshelveProjectExecutable
         {
             final File shelvedProjectArchive = getArchiveFile(shelvedProjectArchiveName);
             LOGGER.info( "Unshelving project [" + shelvedProjectArchiveName + "]." );
+			
             try
             {
-                new FilePath( shelvedProjectArchive ).unzip(
-                    new FilePath( new File( Hudson.getInstance().getRootDir(), "jobs" ) ) );
+				if ( shelvedProjectArchiveName.toLowerCase().matches("(.+)\\.zip") )
+				{
+					new FilePath( shelvedProjectArchive ).unzip(
+						new FilePath( new File( Hudson.getInstance().getRootDir(), "jobs" ) ) );
+				}
+				else 
+				{
+					new FilePath( shelvedProjectArchive ).untar(
+						new FilePath( new File( Hudson.getInstance().getRootDir(), "jobs" ) ), FilePath.TarCompression.GZIP );
+				}
                 shelvedProjectArchive.delete();
                 Hudson.getInstance().reload();
             }

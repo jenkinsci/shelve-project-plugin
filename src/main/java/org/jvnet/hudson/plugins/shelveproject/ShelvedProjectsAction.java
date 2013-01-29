@@ -66,7 +66,7 @@ public class ShelvedProjectsAction
         shelvedProjectsDir.mkdirs();
 
         final Collection<File> shelvedProjectsArchives =
-            FileUtils.listFiles( shelvedProjectsDir, new String[]{"zip"}, false );
+            FileUtils.listFiles( shelvedProjectsDir, new String[]{"tgz","zip"}, false );
 
         List<ShelvedProject> projects = new LinkedList<ShelvedProject>();
         for ( File archive : shelvedProjectsArchives )
