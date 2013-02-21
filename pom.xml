@@ -4,13 +4,13 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.398</version>
+    <version>1.490</version>
   </parent>
 
   <groupId>org.jenkins-ci.plugins</groupId>
   <artifactId>shelve-project-plugin</artifactId>
   <name>Shelve Project Plugin</name>
-  <version>1.4-SNAPSHOT</version>
+  <version>1.4.targz-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Shelve+Project+Plugin</url>
 

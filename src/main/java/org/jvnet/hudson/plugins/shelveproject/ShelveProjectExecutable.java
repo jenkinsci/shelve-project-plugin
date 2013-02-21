@@ -4,6 +4,7 @@ import hudson.FilePath;
 import hudson.model.AbstractProject;
 import hudson.model.Hudson;
 import hudson.model.Queue;
+import hudson.util.io.ArchiverFactory;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -53,7 +54,8 @@ public class ShelveProjectExecutable
         {
             final File projectRoot = project.getRootDir();
             OutputStream outputStream1 = createOutputStream( Hudson.getInstance().getRootDir(), project.getName() );
-            new FilePath( projectRoot ).zip( outputStream1, new FileFilter()
+            //new FilePath( projectRoot ).zip( outputStream1, new FileFilter()
+            new FilePath( projectRoot ).archive( ArchiverFactory.TARGZ, outputStream1, new FileFilter()
             {
                 public boolean accept( File file )
                 {
@@ -75,7 +77,7 @@ public class ShelveProjectExecutable
     {
         final File baseDir = new File( rootDir, "shelvedProjects" );
         baseDir.mkdirs();
-        final File archive = new File( baseDir, projectName + "-" + System.currentTimeMillis() + ".zip" );
+        final File archive = new File( baseDir, projectName + "-" + System.currentTimeMillis() + ".tgz" );
         return new FileOutputStream( archive );
     }
 

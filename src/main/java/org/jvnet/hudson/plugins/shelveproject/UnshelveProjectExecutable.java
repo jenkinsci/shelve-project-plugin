@@ -10,6 +10,8 @@ import java.io.File;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.io.*;
+import java.net.*;
 
 public class UnshelveProjectExecutable
     implements Queue.Executable
@@ -37,12 +39,34 @@ public class UnshelveProjectExecutable
         {
             final File shelvedProjectArchive = getArchiveFile(shelvedProjectArchiveName);
             LOGGER.info( "Unshelving project [" + shelvedProjectArchiveName + "]." );
+			
             try
             {
-                new FilePath( shelvedProjectArchive ).unzip(
-                    new FilePath( new File( Hudson.getInstance().getRootDir(), "jobs" ) ) );
+				if ( shelvedProjectArchiveName.toLowerCase().matches("(.+)\\.zip") )
+				{
+					new FilePath( shelvedProjectArchive ).unzip(
+						new FilePath( new File( Hudson.getInstance().getRootDir(), "jobs" ) ) );
+				}
+				else 
+				{
+					new FilePath( shelvedProjectArchive ).untar(
+						new FilePath( new File( Hudson.getInstance().getRootDir(), "jobs" ) ), FilePath.TarCompression.GZIP );
+				}
                 shelvedProjectArchive.delete();
-                Hudson.getInstance().reload();
+				
+				//Reload only the project that changed
+				String projectFolderName = shelvedProjectArchiveName.substring(0, shelvedProjectArchiveName.length()-4);
+				int indexHyphen = projectFolderName.lastIndexOf("-");
+				projectFolderName = projectFolderName.substring(0, indexHyphen);
+				String fileData = new String(loadData(Hudson.getInstance().getRootDir() + "\\jobs\\" + projectFolderName + "\\config.xml"));
+				String newConfigFileName = Hudson.getInstance().getRootDir() + "\\jobs\\" + projectFolderName + "\\unshelveConfig.txt";
+				writeToFile(fileData, newConfigFileName);
+				
+				FileInputStream fis = new FileInputStream(newConfigFileName);
+				Hudson.getInstance().createProjectFromXML(projectFolderName, fis);
+				fis.close();
+				File configFile = new File(newConfigFileName);
+				configFile.delete();
             }
             catch ( Exception e )
             {
@@ -70,6 +94,40 @@ public class UnshelveProjectExecutable
     {
         return -1; // impossible to estimate duration
     }
+	
+	public byte[] loadData(String fileName) {
+		byte[] returnVal = null;
+		FileInputStream fis = null;
+		try {
+			fis = new FileInputStream(fileName);
+			returnVal = new byte[fis.available()];
+			fis.read(returnVal);
+			fis.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			if (fis != null) {
+				try {
+					fis.close();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		return returnVal;
+    }
+	
+	boolean writeToFile(String data, String fileName) {
+        try {
+			java.io.FileOutputStream fos = new java.io.FileOutputStream(fileName);
+               fos.write(data.getBytes());
+	        fos.close();
+			return true;
+        } catch (Exception e) {
+			LOGGER.info("*** Could not write to file " + fileName + " ***");
+			e.printStackTrace(System.out);
+			return false;
+        }
+	}
 
     @Override
     public String toString()
