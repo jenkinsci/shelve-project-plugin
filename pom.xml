@@ -16,6 +16,11 @@
 
   <developers>
     <developer>
+      <id>bpatterson</id>
+      <name>Ben Patterson</name>
+      <email>patterson.ben@gmail.com</email>
+    </developer>
+  <developer>
       <id>ashlux</id>
       <name>Ash Lux</name>
       <email>ashlux@gmail.com</email>
