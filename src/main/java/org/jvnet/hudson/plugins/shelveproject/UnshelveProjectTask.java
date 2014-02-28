@@ -6,7 +6,10 @@ import hudson.model.Queue;
 import hudson.model.ResourceList;
 import hudson.model.queue.CauseOfBlockage;
 import hudson.model.queue.SubTask;
+import hudson.security.ACL;
+import org.acegisecurity.Authentication;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -112,4 +115,10 @@ public class UnshelveProjectTask
     {
         return getName();
     }
+
+    @Nonnull
+    public Authentication getDefaultAuthentication() {
+        return ACL.SYSTEM;
+    }
+
 }

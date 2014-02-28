@@ -3,7 +3,10 @@ package org.jvnet.hudson.plugins.shelveproject;
 import hudson.model.*;
 import hudson.model.queue.CauseOfBlockage;
 import hudson.model.queue.SubTask;
+import hudson.security.ACL;
+import org.acegisecurity.Authentication;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -110,4 +113,12 @@ public class ShelveProjectTask
     {
         return getName();
     }
-}
+
+    @Nonnull
+    public Authentication getDefaultAuthentication() {
+        return ACL.SYSTEM;
+    }
+
+
+  }
+
