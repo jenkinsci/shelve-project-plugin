@@ -66,7 +66,7 @@ public class ShelveProjectTask
 
     public Queue.Task getOwnerTask()
     {
-        return null;
+        return this;
     }
 
     public Object getSameNodeConstraint()
