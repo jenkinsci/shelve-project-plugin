@@ -85,7 +85,7 @@ public class ItemListenerImplTest
                       freeStyleProject.getActions( ShelveProjectAction.class ).size() );
     }
 
-    public void testOnCreate_shouldAddShelveProjectActionForUpdatedProjects()
+    public void testOnUpdate_shouldAddShelveProjectActionForUpdatedProjects()
         throws IOException
     {
         FreeStyleProject freeStyleProject = createFreeStyleProject( "Goofy Project" );
