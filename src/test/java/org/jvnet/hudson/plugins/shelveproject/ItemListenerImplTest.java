@@ -84,4 +84,16 @@ public class ItemListenerImplTest
         assertEquals( "Project should have had a ShelveProjectAction added.", 1,
                       freeStyleProject.getActions( ShelveProjectAction.class ).size() );
     }
+
+    public void testOnCreate_shouldAddShelveProjectActionForUpdatedProjects()
+        throws IOException
+    {
+        FreeStyleProject freeStyleProject = createFreeStyleProject( "Goofy Project" );
+
+        itemListener.onUpdated( freeStyleProject );
+
+        assertEquals( "Project should have been added just once.", 1, freeStyleProject.getActions().size() );
+        assertEquals( "Project should have had a ShelveProjectAction added.", 1,
+                      freeStyleProject.getActions( ShelveProjectAction.class ).size() );
+    }
 }

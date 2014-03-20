@@ -31,12 +31,13 @@ public class ItemListenerImpl
     @Override
     public void onCreated( Item item )
     {
-        if ( item instanceof AbstractProject )
-        {
-            AbstractProject project = (AbstractProject) item;
-            addShelveProjectProperty( project );
-        }
+		addShelveProjectPropertyIfAbstractProject(item);
     }
+
+	@Override
+	public void onUpdated(Item item) {
+		addShelveProjectPropertyIfAbstractProject(item);
+	}
 
     private void addShelveProjectProperty( AbstractProject<?, ?> project )
     {
@@ -52,4 +53,11 @@ public class ItemListenerImpl
             LOGGER.log( Level.SEVERE, "Failed to persist " + project, e );
         }
     }
+
+    private void addShelveProjectPropertyIfAbstractProject(Item item) {
+		if (item instanceof AbstractProject) {
+			AbstractProject project = (AbstractProject) item;
+			addShelveProjectProperty(project);
+		}
+	}
 }
