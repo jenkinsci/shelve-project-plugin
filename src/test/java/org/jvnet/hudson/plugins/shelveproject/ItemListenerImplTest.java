@@ -3,34 +3,34 @@ package org.jvnet.hudson.plugins.shelveproject;
 import hudson.model.AbstractProject;
 import hudson.model.FreeStyleProject;
 import hudson.model.Hudson;
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
 public class ItemListenerImplTest
-    extends HudsonTestCase
 {
-    private ItemListenerImpl itemListener;
+    @Rule
+    public JenkinsRule jenkinsRule = new JenkinsRule();
+    ItemListenerImpl itemListener = new ItemListenerImpl();
 
-    public void setUp()
-        throws Exception
-    {
-        super.setUp();
-
-        itemListener = new ItemListenerImpl();
-    }
-
+    @Test
     public void testOnLoaded_shouldDoNothingWhenNoProjectsInHudson()
     {
+
         itemListener.onLoaded();
 
         // no exception
     }
 
+   @Test
     public void testOnLoaded_shouldAddShelveProjectActionToAbstractProject()
         throws IOException
     {
-        Hudson.getInstance().getItems().add( createFreeStyleProject( "Mickey Mouse Project" ) );
+
+        jenkinsRule.createFreeStyleProject("Mickey Mouse Project");
 
         itemListener.onLoaded();
 
@@ -40,11 +40,12 @@ public class ItemListenerImplTest
                       project.getActions( ShelveProjectAction.class ).size() );
     }
 
+    @Test
     public void testOnLoaded_shouldAddShelveProjectActionToAllAbstractProjects()
         throws IOException
     {
-        Hudson.getInstance().getItems().add( createFreeStyleProject( "Mickey Mouse Project" ) );
-        Hudson.getInstance().getItems().add( createFreeStyleProject( "Donald Duck Project" ) );
+        Hudson.getInstance().getItems().add( jenkinsRule.createFreeStyleProject( "Mickey Mouse Project" ) );
+        Hudson.getInstance().getItems().add( jenkinsRule.createFreeStyleProject( "Donald Duck Project" ) );
 
         itemListener.onLoaded();
 
@@ -59,10 +60,11 @@ public class ItemListenerImplTest
                       project2.getActions( ShelveProjectAction.class ).size() );
     }
 
+    @Test
     public void testOnLoaded_shouldNotAddShelveProjectActionForProjectsAlreadyWithThisAction()
         throws IOException
     {
-        Hudson.getInstance().getItems().add( createFreeStyleProject( "Mickey Mouse Project" ) );
+        Hudson.getInstance().getItems().add( jenkinsRule.createFreeStyleProject( "Mickey Mouse Project" ) );
 
         itemListener.onLoaded();
         itemListener.onLoaded();
@@ -73,10 +75,11 @@ public class ItemListenerImplTest
                       project1.getActions( ShelveProjectAction.class ).size() );
     }
 
+    @Test
     public void testOnCreate_shouldAddShelveProjectActionForNewProjects()
         throws IOException
     {
-        FreeStyleProject freeStyleProject = createFreeStyleProject( "Mickey Mouse Project" );
+        FreeStyleProject freeStyleProject = jenkinsRule.createFreeStyleProject( "Mickey Mouse Project" );
 
         itemListener.onCreated( freeStyleProject );
 
@@ -85,10 +88,12 @@ public class ItemListenerImplTest
                       freeStyleProject.getActions( ShelveProjectAction.class ).size() );
     }
 
+    @Test
     public void testOnUpdate_shouldAddShelveProjectActionForUpdatedProjects()
         throws IOException
     {
-        FreeStyleProject freeStyleProject = createFreeStyleProject( "Goofy Project" );
+
+        FreeStyleProject freeStyleProject = jenkinsRule.createFreeStyleProject( "Goofy Project" );
 
         itemListener.onUpdated( freeStyleProject );
 
