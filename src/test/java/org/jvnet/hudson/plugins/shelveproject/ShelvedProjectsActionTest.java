@@ -2,7 +2,15 @@ package org.jvnet.hudson.plugins.shelveproject;
 
 import hudson.model.Hudson;
 import org.apache.commons.io.FileUtils;
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.After;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -10,37 +18,42 @@ import java.util.List;
 
 @SuppressWarnings({"ResultOfMethodCallIgnored"})
 public class ShelvedProjectsActionTest
-    extends HudsonTestCase
 {
-    private ShelvedProjectsAction shelvedProjectsAction;
+    @Rule
+    public JenkinsRule jenkinsRule = new JenkinsRule();
 
+    private ShelvedProjectsAction shelvedProjectsAction;
     private File shelvedProjectsDir;
 
+
+
+    @Before
     public void setUp()
         throws Exception
     {
-        super.setUp();
-
+        //super.setUp();
         shelvedProjectsAction = new ShelvedProjectsAction();
-
         shelvedProjectsDir = new File( Hudson.getInstance().getRootDir(), "shelvedProjects" );
         shelvedProjectsDir.mkdirs();
     }
 
+    @After
     public void tearDown()
         throws Exception
     {
-        super.tearDown();
+        //super.tearDown();
 
         shelvedProjectsDir.delete();
     }
 
+    @Test
     public void testGetShelvedProjects_shouldReturnEmptyListWhenNoArchivedProjectsFound()
     {
         assertTrue( "No archived projects should have been found.",
                     shelvedProjectsAction.getShelvedProjects().isEmpty() );
     }
 
+    @Test
     public void testGetShelvedProjects_shouldReturnShelvedProject()
         throws IOException
     {
@@ -58,6 +71,7 @@ public class ShelvedProjectsActionTest
         assertNotNull( "Should have set formatted date.", shelvedProjects.get( 0 ).getFormatedDate() );
     }
 
+    @Test
     public void testGetShelvedProjects_shouldReturnMultipleArchivedProjects()
         throws IOException
     {
@@ -69,6 +83,7 @@ public class ShelvedProjectsActionTest
         assertEquals( "Should have found two archived projects.", 2, shelvedProjects.size() );
     }
 
+    @Test
     public void testGetShelvedProjects_shouldHandleProjectNamesWithHyphens()
         throws IOException
     {
@@ -83,6 +98,7 @@ public class ShelvedProjectsActionTest
                       shelvedProjects.get( 0 ).getTimestamp() );
     }
 
+    @Test
     public void testGetShelvedProjects_shouldSortProjectsByName()
             throws IOException
     {
