@@ -11,7 +11,7 @@
             <j:set var="shelvedProjectsList" value="${it.shelvedProjects}"/>
             <j:choose>
                 <j:when test="${!shelvedProjectsList.isEmpty()}">
-                    <form method="post" action="unshelveProject">
+                    <form method="post" action="manageShelvedProject">
                         <ol>
                             <j:forEach var="shelvedProject" items="${shelvedProjectsList}">
                                 <input type="checkbox" name="archives" value="${shelvedProject.archive.name}"/>
@@ -20,7 +20,8 @@
                         </ol>
 
                         <div align="right">
-                            <input type="submit" value="Unshelve Project" class="submit-button"/>
+                            <input type="submit" name="unshelve" value="Unshelve Project" class="submit-button"/>
+                            <input type="submit" name="delete" value="Delete Project" class="submit-button"/>
                         </div>
                     </form>
                 </j:when>
