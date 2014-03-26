@@ -104,10 +104,18 @@ public class ShelvedProjectsAction
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
-    public HttpResponse doUnshelveProject( StaplerRequest request,
+    public HttpResponse doManageShelvedProject( StaplerRequest request,
                                            StaplerResponse response )
         throws IOException, ServletException
     {
+        if(request.hasParameter("unshelve"))
+            return unshelveProject(request);
+        else if (request.hasParameter("delete"))
+            return deleteProject(request);
+        return createRedirectToShelvedProjectsPage();
+    }
+
+    private HttpResponse unshelveProject(StaplerRequest request) {
         Hudson.getInstance().checkPermission( Permission.CREATE );
 
         final String[] archives = request.getParameterValues("archives");
@@ -121,6 +129,22 @@ public class ShelvedProjectsAction
         Hudson.getInstance().getQueue().schedule( new UnshelveProjectTask( archives ), 0 );
 
         return createRedirectToMainPage();
+    }
+
+    private HttpResponse deleteProject(StaplerRequest request) {
+        Hudson.getInstance().checkPermission( Permission.DELETE );
+
+        final String[] archives = request.getParameterValues("archives");
+        if (archives == null)
+        {
+            return createRedirectToShelvedProjectsPage();
+        }
+
+        LOGGER.info("Deleting archived projects.");
+        // Deleting the project could take some time, so add it as a task
+        Hudson.getInstance().getQueue().schedule( new DeleteProjectTask(archives), 0 );
+
+        return createRedirectToShelvedProjectsPage();
     }
 
     public String formatDate( long timestamp )
