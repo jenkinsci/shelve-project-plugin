@@ -1,5 +1,6 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.model.Hudson;
 import hudson.model.Queue;
@@ -20,7 +21,7 @@ public class UnshelveProjectExecutable
 
     private final Queue.Task parentTask;
 
-    public UnshelveProjectExecutable( Queue.Task parentTask, String[] shelvedProjectArchiveNames )
+    UnshelveProjectExecutable( Queue.Task parentTask, String[] shelvedProjectArchiveNames )
     {
         this.parentTask = parentTask;
         this.shelvedProjectArchiveNames = shelvedProjectArchiveNames;
@@ -31,6 +32,7 @@ public class UnshelveProjectExecutable
         return parentTask;
     }
 
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
     public void run()
     {
         for (String shelvedProjectArchiveName : shelvedProjectArchiveNames)

@@ -19,7 +19,7 @@ public class DeleteProjectExecutable
 
     private final Queue.Task parentTask;
 
-    public DeleteProjectExecutable(Queue.Task parentTask, String[] shelvedProjectArchiveNames)
+    DeleteProjectExecutable(Queue.Task parentTask, String[] shelvedProjectArchiveNames)
     {
         this.parentTask = parentTask;
         this.shelvedProjectArchiveNames = shelvedProjectArchiveNames;

@@ -20,7 +20,7 @@ public class UnshelveProjectTask
 {
     private final String[] shelvedProjectArchiveNames;
 
-    public UnshelveProjectTask( String[] shelvedProjectArchiveNames)
+    UnshelveProjectTask( String[] shelvedProjectArchiveNames)
     {
         this.shelvedProjectArchiveNames = shelvedProjectArchiveNames;
     }

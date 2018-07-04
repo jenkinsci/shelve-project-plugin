@@ -1,5 +1,6 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.model.Failure;
 import hudson.model.Hudson;
@@ -56,6 +57,7 @@ public class ShelvedProjectsAction
         return "/shelvedProjects";
     }
 
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
     @SuppressWarnings({"unchecked"})
     @Exported
     public List<ShelvedProject> getShelvedProjects()
@@ -96,7 +98,7 @@ public class ShelvedProjectsAction
     {
         ShelvedProject shelvedProject = new ShelvedProject();
         shelvedProject.setProjectName( StringUtils.substringBeforeLast( archive.getName(), "-" ) );
-        shelvedProject.setTimestamp( Long.valueOf(
+        shelvedProject.setTimestamp( Long.parseLong(
             StringUtils.substringBefore( StringUtils.substringAfterLast( archive.getName(), "-" ), "." ) ) );
         shelvedProject.setArchive( archive );
         shelvedProject.setFormatedDate( formatDate( shelvedProject.getTimestamp() ) );

@@ -1,20 +1,18 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.model.AbstractProject;
 import hudson.model.Hudson;
 import hudson.model.Queue;
-import hudson.security.Permission;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.ServletException;
 
 public class ShelveProjectExecutable
     implements Queue.Executable
@@ -86,7 +84,8 @@ public class ShelveProjectExecutable
         }
 
     }
-    
+
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
     private OutputStream createOutputStream( final File rootDir, final String projectName )
         throws FileNotFoundException
     {
