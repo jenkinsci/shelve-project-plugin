@@ -1,16 +1,13 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.model.AbstractProject;
-import hudson.model.Hudson;
 import hudson.model.Queue;
+import jenkins.model.Jenkins;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,29 +44,25 @@ public class ShelveProjectExecutable
         return -1; // impossible to estimate duration
     }
 
-    private boolean archiveProject()
-    {
-       
+    private boolean archiveProject() {
+
         wipeoutWorkspace();
-        
-        LOGGER.info( "Creating archive for project [" + project.getName() + "]." );
-        try
-        {
-            final File projectRoot = project.getRootDir();
-            OutputStream outputStream1 = createOutputStream( Hudson.getInstance().getRootDir(), project.getName() );
-            new FilePath( projectRoot ).zip( outputStream1, new FileFilter()
-            {
-                public boolean accept( File file )
-                {
-                    return true;
-                }
-            } );
-            outputStream1.close();
+
+        LOGGER.info("Creating archive for project [" + project.getName() + "].");
+        try {
+            Path projectRootPath = project.getRootDir().toPath();
+            FilePath sourcePath = new FilePath(projectRootPath.toFile());
+            Path rootPath = Jenkins.getInstance().getRootDir().toPath();
+            Path shelvedProjectRoot = rootPath.resolve(ShelvedProjectsAction.SHELVED_PROJECTS_DIRECTORY);
+            if(!Files.exists(shelvedProjectRoot)) {
+                Files.createDirectory(shelvedProjectRoot);
+            }
+            Path archivePath = Files.createFile(shelvedProjectRoot.resolve(project.getName() + "-" + System.currentTimeMillis() + ".zip"));
+            FilePath destinationPath = new FilePath(archivePath.toFile());
+            sourcePath.zip(destinationPath);
             return true;
-        }
-        catch ( Exception e )
-        {
-            LOGGER.log( Level.SEVERE, "Could not archive project [" + project.getName() + "].", e );
+        } catch (IOException | InterruptedException e) {
+            LOGGER.log(Level.SEVERE, "Could not archive project [" + project.getName() + "].", e);
             return false;
         }
     }
@@ -83,16 +76,6 @@ public class ShelveProjectExecutable
             LOGGER.log( Level.SEVERE, "Could not wipeout workspace [" + project.getName() + "].", e );
         }
 
-    }
-
-    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
-    private OutputStream createOutputStream( final File rootDir, final String projectName )
-        throws FileNotFoundException
-    {
-        final File baseDir = new File( rootDir, "shelvedProjects" );
-        baseDir.mkdirs();
-        final File archive = new File( baseDir, projectName + "-" + System.currentTimeMillis() + ".zip" );
-        return new FileOutputStream( archive );
     }
 
     private void deleteProject()
