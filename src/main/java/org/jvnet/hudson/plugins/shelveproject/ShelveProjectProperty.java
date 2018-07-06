@@ -41,11 +41,6 @@ public class ShelveProjectProperty
             return TopLevelItem.class.isAssignableFrom( jobType );
         }
 
-        public String getDisplayName()
-        {
-            return null;
-        }
-
         public ShelveProjectProperty newInstance( StaplerRequest req, JSONObject formData )
             throws FormException
         {

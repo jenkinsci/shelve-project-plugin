@@ -119,6 +119,9 @@ public class ShelveProjectTask
         return ACL.SYSTEM;
     }
 
-
-  }
-
+    @Nonnull
+    @Override
+    public Authentication getDefaultAuthentication(Queue.Item item) {
+        return getDefaultAuthentication();
+    }
+}
