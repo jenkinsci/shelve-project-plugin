@@ -4,15 +4,20 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.532.1</version>
+    <version>3.17</version>
+    <relativePath />
   </parent>
 
-  <groupId>org.jenkins-ci.plugins</groupId>
   <artifactId>shelve-project-plugin</artifactId>
   <name>Shelve Project Plugin</name>
-  <version>1.6-SNAPSHOT</version>
+  <version>2.0-SNAPSHOT</version>
   <packaging>hpi</packaging>
-  <url>http://wiki.jenkins-ci.org/display/JENKINS/Shelve+Project+Plugin</url>
+  <url>https://wiki.jenkins-ci.org/display/JENKINS/Shelve+Project+Plugin</url>
+
+  <properties>
+    <jenkins.version>2.60.3</jenkins.version>
+    <java.level>8</java.level>
+  </properties>
 
   <developers>
     <developer>
@@ -34,17 +39,11 @@
       <version>1.8.1</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
-    </dependency>
 
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.0.1</version>
+      <version>2.4</version>
     </dependency>
   </dependencies>
 
@@ -54,39 +53,19 @@
     <url>https://github.com/jenkinsci/shelve-project-plugin-plugin</url>
     <tag>HEAD</tag>
   </scm>
-
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-release-plugin</artifactId>
-		<version>2.4</version>
-        <configuration>
-          <goals>deploy</goals>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
   
   <repositories>
     <repository>
       <id>repo.jenkins-ci.org</id>
-      <url>http://repo.jenkins-ci.org/public/</url>
+      <url>https://repo.jenkins-ci.org/public/</url>
     </repository>
   </repositories>
 
   <pluginRepositories>
     <pluginRepository>
       <id>repo.jenkins-ci.org</id>
-      <url>http://repo.jenkins-ci.org/public/</url>
+      <url>https://repo.jenkins-ci.org/public/</url>
     </pluginRepository>
   </pluginRepositories>
 
-  <distributionManagement>
-    <repository>
-      <id>maven.jenkins-ci.org</id>
-      <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
-    </repository>
-  </distributionManagement>
-  
-  
 </project>

@@ -1,11 +1,10 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
 import hudson.Extension;
-import hudson.model.Failure;
 import hudson.model.Hudson;
 import hudson.model.RootAction;
 import hudson.security.Permission;
-import org.apache.commons.io.FileUtils;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
@@ -17,14 +16,16 @@ import org.kohsuke.stapler.export.ExportedBean;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.Collator;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @ExportedBean(defaultVisibility = 999)
@@ -32,7 +33,8 @@ import java.util.logging.Logger;
 public class ShelvedProjectsAction
     implements RootAction
 {
-    final static Logger LOGGER = Logger.getLogger( ShelvedProjectsAction.class.getName() );
+    private final static Logger LOGGER = Logger.getLogger( ShelvedProjectsAction.class.getName() );
+    static final String SHELVED_PROJECTS_DIRECTORY = "shelvedProjects";
 
     public String getIconFileName()
     {
@@ -51,31 +53,36 @@ public class ShelvedProjectsAction
         return "Shelved Projects";
     }
 
-    public String getUrlName()
-    {
-        return "/shelvedProjects";
+    public String getUrlName() {
+        return "/" + SHELVED_PROJECTS_DIRECTORY;
     }
 
-    @SuppressWarnings({"unchecked"})
     @Exported
-    public List<ShelvedProject> getShelvedProjects()
-    {
-        Hudson.getInstance().checkPermission( Permission.CREATE );
-
-        final File shelvedProjectsDir = new File( Hudson.getInstance().getRootDir(), "shelvedProjects" );
-        shelvedProjectsDir.mkdirs();
-
-        final Collection<File> shelvedProjectsArchives =
-            FileUtils.listFiles( shelvedProjectsDir, new String[]{"zip"}, false );
-
-        List<ShelvedProject> projects = new LinkedList<ShelvedProject>();
-        for ( File archive : shelvedProjectsArchives )
-        {
-            projects.add( getShelvedProjectFromArchive( archive ) );
+    public List<ShelvedProject> getShelvedProjects() {
+        Jenkins.getInstance().checkPermission(Permission.CREATE);
+        Path rootPath = Jenkins.getInstance().getRootDir().toPath();
+        List<ShelvedProject> projects = new LinkedList<>();
+        try {
+            Path shelvedProjectRoot = rootPath.resolve(ShelvedProjectsAction.SHELVED_PROJECTS_DIRECTORY);
+            if (!Files.exists(shelvedProjectRoot)) {
+                Files.createDirectory(shelvedProjectRoot);
+            }
+            PathMatcher zipMatcher = FileSystems.getDefault().getPathMatcher("glob:**/*.zip");
+            Files.walkFileTree(shelvedProjectRoot, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    super.visitFile(file, attrs);
+                    if (zipMatcher.matches(file)) {
+                        projects.add(getShelvedProjectFromArchive(file.toFile()));
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Could not get the list of shelved projects", e);
+        } finally {
+            sortProjectsAlphabetically(projects);
         }
-
-        sortProjectsAlphabetically(projects);
-
         return projects;
     }
 
@@ -96,7 +103,7 @@ public class ShelvedProjectsAction
     {
         ShelvedProject shelvedProject = new ShelvedProject();
         shelvedProject.setProjectName( StringUtils.substringBeforeLast( archive.getName(), "-" ) );
-        shelvedProject.setTimestamp( Long.valueOf(
+        shelvedProject.setTimestamp( Long.parseLong(
             StringUtils.substringBefore( StringUtils.substringAfterLast( archive.getName(), "-" ), "." ) ) );
         shelvedProject.setArchive( archive );
         shelvedProject.setFormatedDate( formatDate( shelvedProject.getTimestamp() ) );

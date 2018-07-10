@@ -20,7 +20,7 @@ public class UnshelveProjectTask
 {
     private final String[] shelvedProjectArchiveNames;
 
-    public UnshelveProjectTask( String[] shelvedProjectArchiveNames)
+    UnshelveProjectTask( String[] shelvedProjectArchiveNames)
     {
         this.shelvedProjectArchiveNames = shelvedProjectArchiveNames;
     }
@@ -119,6 +119,12 @@ public class UnshelveProjectTask
     @Nonnull
     public Authentication getDefaultAuthentication() {
         return ACL.SYSTEM;
+    }
+
+    @Nonnull
+    @Override
+    public Authentication getDefaultAuthentication(Queue.Item item) {
+        return getDefaultAuthentication();
     }
 
 }

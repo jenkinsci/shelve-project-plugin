@@ -20,7 +20,7 @@ public class DeleteProjectTask
 {
     private final String[] shelvedProjectArchiveNames;
 
-    public DeleteProjectTask(String[] shelvedProjectArchiveNames)
+    DeleteProjectTask(String[] shelvedProjectArchiveNames)
     {
         this.shelvedProjectArchiveNames = shelvedProjectArchiveNames;
     }
@@ -119,6 +119,12 @@ public class DeleteProjectTask
     @Nonnull
     public Authentication getDefaultAuthentication() {
         return ACL.SYSTEM;
+    }
+
+    @Nonnull
+    @Override
+    public Authentication getDefaultAuthentication(Queue.Item item) {
+        return getDefaultAuthentication();
     }
 
 }
