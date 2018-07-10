@@ -4,31 +4,42 @@ package org.jvnet.hudson.plugins.shelveproject;
 import hudson.model.Hudson;
 import hudson.model.FreeStyleProject;
 import hudson.model.FreeStyleBuild;
-import org.jvnet.hudson.test.HudsonTestCase;
+import jenkins.model.Jenkins;
+import org.junit.Rule;
 
 import hudson.tasks.Shell;
 import hudson.model.Queue;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Properties;
+
 import org.junit.Test;
-import static org.junit.Assert.*;
+import org.jvnet.hudson.test.Issue;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.MockFolder;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
  * @author ben.patterson
  */
-public class ShelveProjectExecutableTest extends HudsonTestCase {
+public class ShelveProjectExecutableTest {
    private Queue.Task parentTask;
-   
+
+    @Rule
+    public JenkinsRule jenkinsRule = new JenkinsRule();
 
     @Test
-    public void testProjectZipIsCreated() throws Exception {
+    public void testProjectTarIsCreated() throws Exception {
         
         String projectname = "ProjectWithWorkspace";
-        String files;
-        
-        
-        FreeStyleProject project = createFreeStyleProject(projectname);
+
+        FreeStyleProject project = jenkinsRule.createFreeStyleProject(projectname);
         project.getBuildersList().add(new Shell("echo hello"));
         
         FreeStyleBuild b = project.scheduleBuild2(0).get();
@@ -42,22 +53,39 @@ public class ShelveProjectExecutableTest extends HudsonTestCase {
         ShelveProjectExecutable a = new ShelveProjectExecutable (parentTask,project);
         a.run();
 
-        // Read through target directory and find that the zip has been created.
-        File[] listOfFiles = shelvedProjectsDir.listFiles(); 
-        for (int i = 0; i < listOfFiles.length; i++) 
-            {
-                if (listOfFiles[i].isFile()) 
-                {
-                files = listOfFiles[i].getName();
-                if (files.startsWith(projectname) && (files.endsWith(".zip"))) 
-                    {
-                    assertTrue("Found project .zip file in shelvedProjects", true);
-                    } else {
-                    fail("Did not find project .zip file in shelvedProjects");
-                        }
-                }
-            };                
+        DeleteProjectExecutableTest.FileExplorerVisitor fileExplorerVisitor = new DeleteProjectExecutableTest.FileExplorerVisitor();
+        Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
+
+        assertEquals("Not the expected number of archive archives", 1, fileExplorerVisitor.getArchiveFileCount());
+        assertEquals("Not the expected number of metadata archives", 1, fileExplorerVisitor.getMetadataFileCount());
+
     }
     
-    
+    @Issue("JENKINS-43434")
+    @Test
+    public void testProjectInFolderContainsTheCorrectMetadata() throws IOException {
+        String projectName = "ProjectWithWorkspace";
+
+        MockFolder myFolder = jenkinsRule.createFolder("myFolder");
+        FreeStyleProject project = myFolder.createProject(FreeStyleProject.class, projectName);
+
+        ShelveProjectExecutable a = new ShelveProjectExecutable (null,project);
+        a.run();
+
+        File shelvedProjectsDir = new File( Jenkins.getInstance().getRootDir(), ShelvedProjectsAction.SHELVED_PROJECTS_DIRECTORY);
+
+        DeleteProjectExecutableTest.FileExplorerVisitor fileExplorerVisitor = new DeleteProjectExecutableTest.FileExplorerVisitor();
+        Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
+
+        assertEquals("Not the expected number of archive archives", 1, fileExplorerVisitor.getArchiveFileCount());
+        assertEquals("Not the expected number of metadata archives", 1, fileExplorerVisitor.getMetadataFileCount());
+
+        Path metadataPath = fileExplorerVisitor.getMetadata().get(0);
+        Properties properties = ShelvedProject.loadMetadata(metadataPath.toFile());
+
+        assertEquals("Not the expected path", "ProjectWithWorkspace", properties.get(ShelveProjectExecutable.PROJECT_NAME_PROPERTY));
+        assertEquals("Not the expected path", "myFolder/ProjectWithWorkspace", properties.get(ShelveProjectExecutable.PROJECT_FULL_NAME_PROPERTY));
+        assertEquals("Not the expected path", "myFolder/jobs/ProjectWithWorkspace", properties.get(ShelveProjectExecutable.PROJECT_PATH_PROPERTY));
+
+    }
 }
