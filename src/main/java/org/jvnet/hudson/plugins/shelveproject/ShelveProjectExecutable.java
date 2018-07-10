@@ -59,7 +59,7 @@ public class ShelveProjectExecutable
         try {
             Path projectRootPath = project.getRootDir().toPath();
             List<String> regexp = createListOfFoldersToBackup();
-            regexp.add(relativizeToJenkinsJobsDirectory(projectRootPath.resolve("**/*")));
+            regexp.add(relativizeToJenkinsJobsDirectory(projectRootPath) + "/**/*");
             long archiveTime = System.currentTimeMillis();
             String backupBaseName = project.getName() + "-" + archiveTime;
             Path rootPath = Jenkins.getInstance().getRootDir().toPath();
