@@ -72,6 +72,7 @@ public class DeleteProjectExecutableTest {
         private int archiveFileCount = 0;
         private int unexpectedFileCount = 0;
         private final List<String> archives = new ArrayList<>();
+        private final List<Path> metadata = new ArrayList<>();
 
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
@@ -81,6 +82,7 @@ public class DeleteProjectExecutableTest {
                 archives.add(file.getFileName().toString());
             } else if (METADATA_FILE_EXTENSION.equals(extension)) {
                 metadataFileCount++;
+                metadata.add(file);
             } else {
                 unexpectedFileCount++;
             }
@@ -101,6 +103,10 @@ public class DeleteProjectExecutableTest {
 
         int getUnexpectedFileCount() {
             return unexpectedFileCount;
+        }
+
+        List<Path> getMetadata() {
+            return metadata;
         }
     }
 
