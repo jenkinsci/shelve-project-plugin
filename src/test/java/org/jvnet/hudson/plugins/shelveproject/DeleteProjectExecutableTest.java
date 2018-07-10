@@ -3,18 +3,27 @@ package org.jvnet.hudson.plugins.shelveproject;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.model.Hudson;
 import hudson.model.Queue.Task;
 import hudson.tasks.Shell;
+import jenkins.model.Jenkins;
+import org.apache.commons.io.FilenameUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.*;
 
 public class DeleteProjectExecutableTest {
     private Task parentTask;
@@ -28,11 +37,9 @@ public class DeleteProjectExecutableTest {
      * @throws Exception
      */
     @Test
-    public void testProjectZipIsDeleted() throws Exception {
+    public void testProjectTarIsDeleted() throws Exception {
 
         String projectname = "ProjectWithWorkspace";
-        String filename;
-        ArrayList<String> files = new ArrayList<String>();
 
         FreeStyleProject project = jenkinsRule.createFreeStyleProject(projectname);
         project.getBuildersList().add(new Shell("echo hello"));
@@ -41,38 +48,59 @@ public class DeleteProjectExecutableTest {
 
         assertTrue("Workspace should exist by now", b.getWorkspace().exists());
 
-        File shelvedProjectsDir = new File(Hudson.getInstance().getRootDir(), "shelvedProjects");
+        File shelvedProjectsDir = new File(Jenkins.getInstance().getRootDir(), "shelvedProjects");
         shelvedProjectsDir.mkdirs();
 
         ShelveProjectExecutable a = new ShelveProjectExecutable(parentTask, project);
         a.run();
 
-        File[] listOfFiles = shelvedProjectsDir.listFiles();
+        assertEquals("Directory should contain two archives, the metadata and the archive", 2, Files.list(shelvedProjectsDir.toPath()).count());
 
-        // Read through target directory and find that the zip has been created.
-        for (File file : listOfFiles) {
-            if (file.isFile()) {
-                filename = file.getName();
-                files.add(filename);
-                if (filename.startsWith(projectname) && (filename.endsWith(".zip"))) {
-                    assertTrue("Found project .zip file in shelvedProjects", true);
-                } else {
-                    fail("Did not find project .zip file in shelvedProjects");
-                }
-            }
-        }
+        FileExplorerVisitor fileExplorerVisitor = new FileExplorerVisitor();
+        Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
+        assertEquals("Not the expected number of archive archives", 1, fileExplorerVisitor.getArchiveFileCount());
+        assertEquals("Not the expected number of metadata archives", 1, fileExplorerVisitor.getMetadataFileCount());
 
-        DeleteProjectExecutable deleteProjectExecutable = new DeleteProjectExecutable(parentTask, files.toArray(new String[files.size()]));
+        DeleteProjectExecutable deleteProjectExecutable = new DeleteProjectExecutable(parentTask, fileExplorerVisitor.getArchives());
         deleteProjectExecutable.run();
 
-        // Read through target directory and find that the zip has been deleted.
-        for (File listOfFile : listOfFiles) {
-            if (listOfFile.isFile()) {
-                filename = listOfFile.getName();
-                if (files.contains(filename)) {
-                    fail("Found project .zip file in shelvedProjects");
-                }
+        assertEquals("Directory should not contain anything", 0, Files.list(shelvedProjectsDir.toPath()).count());
+    }
+
+    static class FileExplorerVisitor extends SimpleFileVisitor<Path> {
+        private int metadataFileCount = 0;
+        private int archiveFileCount = 0;
+        private int unexpectedFileCount = 0;
+        private final List<String> archives = new ArrayList<>();
+
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            String extension = FilenameUtils.getExtension(file.toString());
+            if (ARCHIVE_FILE_EXTENSION.equals(extension)) {
+                archiveFileCount++;
+                archives.add(file.getFileName().toString());
+            } else if (METADATA_FILE_EXTENSION.equals(extension)) {
+                metadataFileCount++;
+            } else {
+                unexpectedFileCount++;
             }
+            return super.visitFile(file, attrs);
+        }
+
+        int getArchiveFileCount() {
+            return archiveFileCount;
+        }
+
+        int getMetadataFileCount() {
+            return metadataFileCount;
+        }
+
+        String[] getArchives() {
+            return archives.toArray(new String[0]);
+        }
+
+        int getUnexpectedFileCount() {
+            return unexpectedFileCount;
         }
     }
 
@@ -83,13 +111,9 @@ public class DeleteProjectExecutableTest {
      */
     @Test
     public void testParallelProjectUnshelvingAndDeleting() throws Exception {
-        String filename;
 
         String projectnameToUnshelve = "ProjectToUnshelveWithWorkspace";
         String projectnameToDelete = "ProjectToDeleteWithWorkspace";
-
-        ArrayList<String> filenamesToUnshelve = new ArrayList<String>();
-        ArrayList<String> filenamesToDelete = new ArrayList<String>();
 
         // Project to unshelve
         FreeStyleProject projectToUnshelve = jenkinsRule.createFreeStyleProject(projectnameToUnshelve);
@@ -103,7 +127,7 @@ public class DeleteProjectExecutableTest {
         FreeStyleBuild deleteBuild = projectToDelete.scheduleBuild2(0).get();
         assertTrue("Workspace should exist by now", deleteBuild.getWorkspace().exists());
 
-        File shelvedProjectsDir = new File(Hudson.getInstance().getRootDir(), "shelvedProjects");
+        File shelvedProjectsDir = new File(Jenkins.getInstance().getRootDir(), "shelvedProjects");
         shelvedProjectsDir.mkdirs();
 
         //Shelve project to be deleted later on
@@ -113,41 +137,22 @@ public class DeleteProjectExecutableTest {
         shelveProjectExecutable = new ShelveProjectExecutable(parentTask, projectToUnshelve);
         shelveProjectExecutable.run();
 
-        File[] listOfFiles = shelvedProjectsDir.listFiles();
-        for (File file : listOfFiles) {
-            if (file.isFile()) {
-                filename = file.getName();
-                // Check if project to delete later on is created
-                if (filename.startsWith(projectnameToDelete) && (filename.endsWith(".zip"))) {
-                    filenamesToDelete.add(filename);
-                    assertTrue("Found projectToDelete .zip file in shelvedProjects", true);
-                } else if (filename.startsWith(projectnameToUnshelve) && (filename.endsWith(".zip"))) {
-                    filenamesToUnshelve.add(filename);
-                    assertTrue("Found projectToUnshelve .zip file in shelvedProjects", true);
-                } else {
-                    fail("Unexpected file found in shelvedProjects");
-                }
-            }
-        }
+        FileExplorerVisitor fileExplorerVisitor = new FileExplorerVisitor();
+        Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
 
-        UnshelveProjectExecutable unShelveProjectExecutable = new UnshelveProjectExecutable(parentTask,filenamesToUnshelve.toArray(new String[filenamesToUnshelve.size()]));
-        DeleteProjectExecutable deleteProjectExecutable = new DeleteProjectExecutable(parentTask, filenamesToDelete.toArray(new String[filenamesToDelete.size()]));
+        assertEquals("Not the expected number of archive archives", 2, fileExplorerVisitor.getArchiveFileCount());
+        assertEquals("Not the expected number of metadata archives", 2, fileExplorerVisitor.getMetadataFileCount());
+        assertEquals("There should be no unexpected files", 0, fileExplorerVisitor.getUnexpectedFileCount());
+
+        String[] archives = fileExplorerVisitor.getArchives();
+
+        UnshelveProjectExecutable unShelveProjectExecutable = new UnshelveProjectExecutable(parentTask, new String[]{archives[0]});
+        DeleteProjectExecutable deleteProjectExecutable = new DeleteProjectExecutable(parentTask, new String[]{archives[1]});
 
         unShelveProjectExecutable.run();
         deleteProjectExecutable.run();
 
-        listOfFiles = shelvedProjectsDir.listFiles();
+        assertEquals("Directory should not contain anything", 0, Files.list(shelvedProjectsDir.toPath()).count());
 
-        // Check if project to delete is deleted and project to unshelve is unshelved
-        for (File file : listOfFiles) {
-            if (file.isFile()) {
-                filename = file.getName();
-                if (filename.startsWith(projectnameToUnshelve) && (filename.endsWith(".zip"))) {
-                    fail("Found projectToUnshelve .zip file in shelvedProjects");
-                } else if (filenamesToDelete.contains(filename)) {
-                    fail("Found projectToDelete .zip file in shelvedProjects");
-                }
-            }
-        }
     }
 }

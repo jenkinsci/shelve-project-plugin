@@ -10,8 +10,9 @@ import hudson.tasks.Shell;
 import hudson.model.Queue;
 
 import java.io.File;
+import java.nio.file.Files;
+
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -22,12 +23,10 @@ public class ShelveProjectExecutableTest extends HudsonTestCase {
    
 
     @Test
-    public void testProjectZipIsCreated() throws Exception {
+    public void testProjectTarIsCreated() throws Exception {
         
         String projectname = "ProjectWithWorkspace";
-        String files;
-        
-        
+
         FreeStyleProject project = createFreeStyleProject(projectname);
         project.getBuildersList().add(new Shell("echo hello"));
         
@@ -42,21 +41,12 @@ public class ShelveProjectExecutableTest extends HudsonTestCase {
         ShelveProjectExecutable a = new ShelveProjectExecutable (parentTask,project);
         a.run();
 
-        // Read through target directory and find that the zip has been created.
-        File[] listOfFiles = shelvedProjectsDir.listFiles(); 
-        for (int i = 0; i < listOfFiles.length; i++) 
-            {
-                if (listOfFiles[i].isFile()) 
-                {
-                files = listOfFiles[i].getName();
-                if (files.startsWith(projectname) && (files.endsWith(".zip"))) 
-                    {
-                    assertTrue("Found project .zip file in shelvedProjects", true);
-                    } else {
-                    fail("Did not find project .zip file in shelvedProjects");
-                        }
-                }
-            };                
+        DeleteProjectExecutableTest.FileExplorerVisitor fileExplorerVisitor = new DeleteProjectExecutableTest.FileExplorerVisitor();
+        Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
+
+        assertEquals("Not the expected number of archive archives", 1, fileExplorerVisitor.getArchiveFileCount());
+        assertEquals("Not the expected number of metadata archives", 1, fileExplorerVisitor.getMetadataFileCount());
+
     }
     
     
