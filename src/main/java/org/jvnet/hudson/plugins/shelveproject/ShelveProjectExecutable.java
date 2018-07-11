@@ -7,6 +7,7 @@ import hudson.model.ItemGroup;
 import hudson.model.Queue;
 import jenkins.model.Jenkins;
 
+import javax.annotation.Nonnull;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -85,7 +86,7 @@ public class ShelveProjectExecutable
         Path archivePath = Files.createFile(shelvedProjectRoot.resolve(backupBaseName + "." + METADATA_FILE_EXTENSION));
         Path projectRootPath = project.getRootDir().toPath();
         try (BufferedWriter writer = Files.newBufferedWriter(archivePath, Charset.forName("UTF-8"))) {
-            addNewProperty(writer, PROJECT_PATH_PROPERTY, relativizeToJenkinsJobsDirectory(projectRootPath));
+            addNewProperty(writer, PROJECT_PATH_PROPERTY, escapeForPropertiesFile(relativizeToJenkinsJobsDirectory(projectRootPath)));
             addNewProperty(writer, PROJECT_NAME_PROPERTY, project.getName());
             addNewProperty(writer, ARCHIVE_TIME_PROPERTY, Long.toString(archiveTime));
             addNewProperty(writer, PROJECT_FULL_NAME_PROPERTY, project.getFullName());
@@ -93,6 +94,11 @@ public class ShelveProjectExecutable
             LOGGER.log(Level.SEVERE, "Could not write metadata for project [" + project.getName() + "].", e);
             throw e;
         }
+    }
+
+    private static String escapeForPropertiesFile(@Nonnull  String path) {
+        // Windows is using \ while it's an escape character in properties files
+        return path.replaceAll("\\\\", java.util.regex.Matcher.quoteReplacement("\\\\"));
     }
 
     private static void addNewProperty(BufferedWriter writer, String key, String value) throws IOException {

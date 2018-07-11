@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 import org.junit.Test;
@@ -85,7 +86,7 @@ public class ShelveProjectExecutableTest {
 
         assertEquals("Not the expected path", "ProjectWithWorkspace", properties.get(ShelveProjectExecutable.PROJECT_NAME_PROPERTY));
         assertEquals("Not the expected path", "myFolder/ProjectWithWorkspace", properties.get(ShelveProjectExecutable.PROJECT_FULL_NAME_PROPERTY));
-        assertEquals("Not the expected path", "myFolder/jobs/ProjectWithWorkspace", properties.get(ShelveProjectExecutable.PROJECT_PATH_PROPERTY));
+        assertEquals("Not the expected path", Paths.get("myFolder/jobs/ProjectWithWorkspace").toString(), properties.get(ShelveProjectExecutable.PROJECT_PATH_PROPERTY));
 
     }
 }
