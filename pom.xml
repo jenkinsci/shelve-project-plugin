@@ -30,6 +30,11 @@
       <name>Ash Lux</name>
       <email>ashlux@gmail.com</email>
     </developer>
+    <developer>
+      <id>pierrebtz</id>
+      <name>Pierre Beitz</name>
+      <email>pibeitz@gmail.com</email>
+    </developer>
   </developers>
 
   <dependencies>
