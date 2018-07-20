@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.*;
+
 @ExportedBean(defaultVisibility = 999)
 @Extension
 public class ShelvedProjectsAction
@@ -67,12 +69,15 @@ public class ShelvedProjectsAction
             if (!Files.exists(shelvedProjectRoot)) {
                 Files.createDirectory(shelvedProjectRoot);
             }
-            PathMatcher zipMatcher = FileSystems.getDefault().getPathMatcher("glob:**/*.zip");
+            PathMatcher legacyMatcher = FileSystems.getDefault().getPathMatcher("glob:**/*.zip");
+            PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/*." + ARCHIVE_FILE_EXTENSION);
             Files.walkFileTree(shelvedProjectRoot, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     super.visitFile(file, attrs);
-                    if (zipMatcher.matches(file)) {
+                    if (legacyMatcher.matches(file)) {
+                        projects.add(getLegacyShelvedProjectFromArchive(file.toFile()));
+                    } else if(matcher.matches(file)) {
                         projects.add(getShelvedProjectFromArchive(file.toFile()));
                     }
                     return FileVisitResult.CONTINUE;
@@ -99,7 +104,11 @@ public class ShelvedProjectsAction
         });
     }
 
-    private ShelvedProject getShelvedProjectFromArchive( File archive )
+    private ShelvedProject getShelvedProjectFromArchive(File archive) {
+        return ShelvedProject.createFromTar(archive);
+    }
+
+    private ShelvedProject getLegacyShelvedProjectFromArchive(File archive )
     {
         ShelvedProject shelvedProject = new ShelvedProject();
         shelvedProject.setProjectName( StringUtils.substringBeforeLast( archive.getName(), "-" ) );
@@ -154,7 +163,8 @@ public class ShelvedProjectsAction
         return createRedirectToShelvedProjectsPage();
     }
 
-    public String formatDate( long timestamp )
+    // TODO this will need some cleaning, outside of the scope of this dev
+    public static String formatDate( long timestamp )
     {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "EEE, d MMM yyyy HH:mm:ss Z" );
         return simpleDateFormat.format( new Date( timestamp ) );
