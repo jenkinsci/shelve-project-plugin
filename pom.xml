@@ -24,16 +24,25 @@
       <id>bpatterson</id>
       <name>Ben Patterson</name>
       <email>patterson.ben@gmail.com</email>
+      <roles>
+        <role>Maintainer (retired)</role>
+      </roles>
     </developer>
   <developer>
       <id>ashlux</id>
       <name>Ash Lux</name>
       <email>ashlux@gmail.com</email>
+      <roles>
+        <role>Maintainer (retired)</role>
+      </roles>
     </developer>
     <developer>
       <id>pierrebtz</id>
       <name>Pierre Beitz</name>
       <email>pibeitz@gmail.com</email>
+      <roles>
+        <role>Maintainer</role>
+      </roles>
     </developer>
   </developers>
 
