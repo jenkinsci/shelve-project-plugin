@@ -3,6 +3,7 @@ package org.jvnet.hudson.plugins.shelveproject;
 import com.cloudbees.hudson.plugins.folder.AbstractFolder;
 import hudson.FilePath;
 import hudson.model.AbstractProject;
+import hudson.model.BuildableItem;
 import hudson.model.ItemGroup;
 import hudson.model.Queue;
 import jenkins.model.Jenkins;
@@ -29,13 +30,13 @@ public class ShelveProjectExecutable
     static final String PROJECT_NAME_PROPERTY = "project.name";
     static final String ARCHIVE_TIME_PROPERTY = "archive.time";
 
-    private final AbstractProject project;
+    private final BuildableItem item;
 
     private final Queue.Task parentTask;
 
-    public ShelveProjectExecutable(Queue.Task parentTask, AbstractProject project) {
+    public ShelveProjectExecutable(Queue.Task parentTask, BuildableItem item) {
         this.parentTask = parentTask;
-        this.project = project;
+        this.item = item;
     }
 
     public Queue.Task getParent() {
@@ -56,13 +57,13 @@ public class ShelveProjectExecutable
 
         wipeoutWorkspace();
 
-        LOGGER.info("Creating archive for project [" + project.getName() + "].");
+        LOGGER.info("Creating archive for project [" + item.getName() + "].");
         try {
-            Path projectRootPath = project.getRootDir().toPath();
+            Path projectRootPath = item.getRootDir().toPath();
             List<String> regexp = createListOfFoldersToBackup();
             regexp.add(relativizeToJenkinsJobsDirectory(projectRootPath) + "/**/*");
             long archiveTime = System.currentTimeMillis();
-            String backupBaseName = project.getName() + "-" + archiveTime;
+            String backupBaseName = item.getName() + "-" + archiveTime;
             Path rootPath = Jenkins.getInstance().getRootDir().toPath();
             Path shelvedProjectRoot = rootPath.resolve(ShelvedProjectsAction.SHELVED_PROJECTS_DIRECTORY);
             if (!Files.exists(shelvedProjectRoot)) {
@@ -77,21 +78,21 @@ public class ShelveProjectExecutable
             tar(new FilePath(getJenkinsJobsDirectory()), destinationPath, String.join(",", regexp));
             return true;
         } catch (IOException | InterruptedException e) {
-            LOGGER.log(Level.SEVERE, "Could not archive project [" + project.getName() + "].", e);
+            LOGGER.log(Level.SEVERE, "Could not archive project [" + item.getName() + "].", e);
             return false;
         }
     }
 
     private void buildMetadataFile(Path shelvedProjectRoot, String backupBaseName, long archiveTime) throws IOException {
         Path archivePath = Files.createFile(shelvedProjectRoot.resolve(backupBaseName + "." + METADATA_FILE_EXTENSION));
-        Path projectRootPath = project.getRootDir().toPath();
+        Path projectRootPath = item.getRootDir().toPath();
         try (BufferedWriter writer = Files.newBufferedWriter(archivePath, Charset.forName("UTF-8"))) {
             addNewProperty(writer, PROJECT_PATH_PROPERTY, escapeForPropertiesFile(relativizeToJenkinsJobsDirectory(projectRootPath)));
-            addNewProperty(writer, PROJECT_NAME_PROPERTY, project.getName());
+            addNewProperty(writer, PROJECT_NAME_PROPERTY, item.getName());
             addNewProperty(writer, ARCHIVE_TIME_PROPERTY, Long.toString(archiveTime));
-            addNewProperty(writer, PROJECT_FULL_NAME_PROPERTY, project.getFullName());
+            addNewProperty(writer, PROJECT_FULL_NAME_PROPERTY, item.getFullName());
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Could not write metadata for project [" + project.getName() + "].", e);
+            LOGGER.log(Level.SEVERE, "Could not write metadata for project [" + item.getName() + "].", e);
             throw e;
         }
     }
@@ -116,7 +117,7 @@ public class ShelveProjectExecutable
     private List<String> createListOfFoldersToBackup() {
         List<String> regexp = new ArrayList<>();
         // TODO: test Folder plugin is here
-        ItemGroup parent = project.getParent();
+        ItemGroup parent = item.getParent();
         // technically not using Folder plugin code, but in practice, the Folder plugin code should be there for this
         // situation to occur.
         while (parent instanceof AbstractFolder) {
@@ -137,26 +138,28 @@ public class ShelveProjectExecutable
     }
 
     private void wipeoutWorkspace() {
-        LOGGER.info("Wiping out workspace for project [" + project.getName() + "].");
+        LOGGER.info("Wiping out workspace for project [" + item.getName() + "].");
         try {
-            project.doDoWipeOutWorkspace();
+            if(item instanceof AbstractProject) {
+                ((AbstractProject) item).doDoWipeOutWorkspace();
+            }
+            // there is no API to do this in the case of Pipelines: https://issues.jenkins-ci.org/browse/JENKINS-26138
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Could not wipeout workspace [" + project.getName() + "].", e);
+            LOGGER.log(Level.SEVERE, "Could not wipeout workspace [" + item.getName() + "].", e);
         }
-
     }
 
     private void deleteProject() {
-        LOGGER.info("Deleting project [" + project.getName() + "].");
+        LOGGER.info("Deleting project [" + item.getName() + "].");
         try {
-           project.delete();
+           item.delete();
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Could not delete project [" + project.getName() + "].", e);
+            LOGGER.log(Level.SEVERE, "Could not delete project [" + item.getName() + "].", e);
         }
     }
 
     @Override
     public String toString() {
-        return "Shelving " + project.getName();
+        return "Shelving " + item.getName();
     }
 }

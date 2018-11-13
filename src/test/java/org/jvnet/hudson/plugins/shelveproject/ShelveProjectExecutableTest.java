@@ -5,6 +5,8 @@ import hudson.model.Hudson;
 import hudson.model.FreeStyleProject;
 import hudson.model.FreeStyleBuild;
 import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Rule;
 
 import hudson.tasks.Shell;
@@ -16,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -24,6 +27,7 @@ import org.jvnet.hudson.test.MockFolder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.jvnet.hudson.plugins.shelveproject.ShelvedProjectsAction.*;
 
 /**
  *
@@ -73,7 +77,7 @@ public class ShelveProjectExecutableTest {
         ShelveProjectExecutable a = new ShelveProjectExecutable (null,project);
         a.run();
 
-        File shelvedProjectsDir = new File( Jenkins.getInstance().getRootDir(), ShelvedProjectsAction.SHELVED_PROJECTS_DIRECTORY);
+        File shelvedProjectsDir = new File( Jenkins.getInstance().getRootDir(), SHELVED_PROJECTS_DIRECTORY);
 
         DeleteProjectExecutableTest.FileExplorerVisitor fileExplorerVisitor = new DeleteProjectExecutableTest.FileExplorerVisitor();
         Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
@@ -87,6 +91,26 @@ public class ShelveProjectExecutableTest {
         assertEquals("Not the expected path", "ProjectWithWorkspace", properties.get(ShelveProjectExecutable.PROJECT_NAME_PROPERTY));
         assertEquals("Not the expected path", "myFolder/ProjectWithWorkspace", properties.get(ShelveProjectExecutable.PROJECT_FULL_NAME_PROPERTY));
         assertEquals("Not the expected path", Paths.get("myFolder/jobs/ProjectWithWorkspace").toString(), properties.get(ShelveProjectExecutable.PROJECT_PATH_PROPERTY));
+    }
+
+    @Issue("JENKINS-26432")
+    @Test
+    public void testPipelineProjectTarIsCreated() throws IOException, ExecutionException, InterruptedException {
+        WorkflowJob project = jenkinsRule.createProject(WorkflowJob.class, "my-pipeline");
+
+        WorkflowRun run = project.scheduleBuild2(0).get();
+
+        File shelvedProjectsDir = new File(Jenkins.getInstance().getRootDir(), SHELVED_PROJECTS_DIRECTORY);
+        shelvedProjectsDir.mkdirs();
+
+        ShelveProjectExecutable executable = new ShelveProjectExecutable(null, project);
+        executable.run();
+
+        DeleteProjectExecutableTest.FileExplorerVisitor fileExplorerVisitor = new DeleteProjectExecutableTest.FileExplorerVisitor();
+        Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
+
+        assertEquals("Not the expected number of archive archives", 1, fileExplorerVisitor.getArchiveFileCount());
+        assertEquals("Not the expected number of metadata archives", 1, fileExplorerVisitor.getMetadataFileCount());
 
     }
 }

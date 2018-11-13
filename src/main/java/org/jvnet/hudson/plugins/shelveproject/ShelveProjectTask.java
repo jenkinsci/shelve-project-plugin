@@ -15,11 +15,11 @@ import java.util.List;
 public class ShelveProjectTask
     implements Queue.FlyweightTask, Queue.TransientTask
 {
-    private final AbstractProject project;
+    private final BuildableItem item;
 
-    public ShelveProjectTask( AbstractProject project )
+    public ShelveProjectTask( BuildableItem project )
     {
-        this.project = project;
+        this.item = project;
     }
 
     public Label getAssignedLabel()
@@ -27,28 +27,27 @@ public class ShelveProjectTask
         return null;
     }
 
-    public Node getLastBuiltOn()
-    {
-        return project.getLastBuiltOn();
+    public Node getLastBuiltOn() {
+        return item.getLastBuiltOn();
     }
 
     public boolean isBuildBlocked()
     {
-        return project.isBuildBlocked();
+        return item.isBuildBlocked();
     }
 
     public String getWhyBlocked()
     {
-        return project.getWhyBlocked();
+        return item.getWhyBlocked();
     }
 
     public CauseOfBlockage getCauseOfBlockage() {
-        return project.getCauseOfBlockage();
+        return item.getCauseOfBlockage();
     }
 
     public String getName()
     {
-        return "Shelve " + project.getName();
+        return "Shelve " + item.getName();
     }
 
     public String getFullDisplayName()
@@ -64,7 +63,7 @@ public class ShelveProjectTask
     public Queue.Executable createExecutable()
         throws IOException
     {
-        return new ShelveProjectExecutable( this, project );
+        return new ShelveProjectExecutable( this, item);
     }
 
     public Queue.Task getOwnerTask()
@@ -79,17 +78,17 @@ public class ShelveProjectTask
 
     public void checkAbortPermission()
     {
-        project.checkAbortPermission();
+        item.checkAbortPermission();
     }
 
     public boolean hasAbortPermission()
     {
-        return project.hasAbortPermission();
+        return item.hasAbortPermission();
     }
 
     public String getUrl()
     {
-        return project.getUrl();
+        return item.getUrl();
     }
 
     public boolean isConcurrentBuild()
@@ -106,7 +105,7 @@ public class ShelveProjectTask
 
     public ResourceList getResourceList()
     {
-        return project.getResourceList();
+        return item.getResourceList();
     }
 
     public String getDisplayName()
