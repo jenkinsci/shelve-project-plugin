@@ -4,6 +4,7 @@ import com.cloudbees.hudson.plugins.folder.AbstractFolder;
 import hudson.FilePath;
 import hudson.model.AbstractProject;
 import hudson.model.BuildableItem;
+import hudson.model.Executor;
 import hudson.model.ItemGroup;
 import hudson.model.Queue;
 import jenkins.model.Jenkins;
@@ -51,6 +52,14 @@ public class ShelveProjectExecutable
 
     public long getEstimatedDuration() {
         return -1; // impossible to estimate duration
+    }
+
+    public String getTimestampString() {
+        Executor executor = Executor.of(this);
+        if(executor != null) {
+            return executor.getTimestampString();
+        }
+        return "N/A";
     }
 
     private boolean archiveProject() {
