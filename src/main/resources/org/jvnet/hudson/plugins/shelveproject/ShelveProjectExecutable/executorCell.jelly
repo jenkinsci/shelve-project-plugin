@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:t="/lib/hudson" xmlns:l="/lib/layout">
+    <td class="pane">
+        <div style="white-space: normal">
+            <j:choose>
+                <j:when test="${h.hasPermission(it.parent, it.parent.READ)}">
+                    <l:breakable value="${it.parent.fullDisplayName}"/>
+                    <t:progressBar tooltip="Started ${it.timestampString} ago"
+                                   red="${it.parent.isBuildBlocked}"
+                                   pos="${it.estimatedDuration}"/>
+                </j:when>
+                <j:otherwise>
+                    <span>${%Unknown Task}</span>
+                </j:otherwise>
+            </j:choose>
+        </div>
+    </td>
+</j:jelly>

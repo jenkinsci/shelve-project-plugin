@@ -47,7 +47,7 @@ public class ShelveProjectTask
 
     public String getName()
     {
-        return "Shelve " + item.getName();
+        return "Shelving " + item.getName();
     }
 
     public String getFullDisplayName()

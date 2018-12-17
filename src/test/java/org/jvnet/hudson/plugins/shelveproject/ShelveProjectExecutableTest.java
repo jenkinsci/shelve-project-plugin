@@ -113,4 +113,12 @@ public class ShelveProjectExecutableTest {
         assertEquals("Not the expected number of metadata archives", 1, fileExplorerVisitor.getMetadataFileCount());
 
     }
+
+    @Issue("JENKINS-20922")
+    @Test
+    public void ifTheExecutableIsNotRunningTheTimeStampReturnsNA() throws IOException {
+        WorkflowJob project = jenkinsRule.createProject(WorkflowJob.class, "my-pipeline");
+        ShelveProjectExecutable executable = new ShelveProjectExecutable(null, project);
+        assertEquals("Not the expected duration", "N/A", executable.getTimestampString());
+    }
 }
