@@ -2,6 +2,7 @@ package org.jvnet.hudson.plugins.shelveproject;
 
 import com.cloudbees.hudson.plugins.folder.AbstractFolder;
 import hudson.FilePath;
+import hudson.Plugin;
 import hudson.model.AbstractProject;
 import hudson.model.BuildableItem;
 import hudson.model.Executor;
@@ -125,15 +126,17 @@ public class ShelveProjectExecutable
 
     private List<String> createListOfFoldersToBackup() {
         List<String> regexp = new ArrayList<>();
-        // TODO: test Folder plugin is here
-        ItemGroup parent = item.getParent();
-        // technically not using Folder plugin code, but in practice, the Folder plugin code should be there for this
-        // situation to occur.
-        while (parent instanceof AbstractFolder) {
-            LOGGER.log(Level.INFO, "Archiving parent folder: " + parent.getFullName());
-            Path absoluteFolderConfigPath = parent.getRootDir().toPath().resolve("config.xml");
-            regexp.add(relativizeToJenkinsJobsDirectory(absoluteFolderConfigPath));
-            parent = ((AbstractFolder) parent).getParent();
+        Plugin folderPlugin = Jenkins.getInstance().getPlugin("cloudbees-folder");
+        if(folderPlugin != null && folderPlugin.getWrapper().isActive()) {
+            ItemGroup parent = item.getParent();
+            // technically not using Folder plugin code, but in practice, the Folder plugin code should be there for this
+            // situation to occur.
+            while (parent instanceof AbstractFolder) {
+                LOGGER.log(Level.INFO, "Archiving parent folder: " + parent.getFullName());
+                Path absoluteFolderConfigPath = parent.getRootDir().toPath().resolve("config.xml");
+                regexp.add(relativizeToJenkinsJobsDirectory(absoluteFolderConfigPath));
+                parent = ((AbstractFolder) parent).getParent();
+            }
         }
         return regexp;
     }
