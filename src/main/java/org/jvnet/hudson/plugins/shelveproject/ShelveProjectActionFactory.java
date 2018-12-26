@@ -2,7 +2,7 @@ package org.jvnet.hudson.plugins.shelveproject;
 
 import hudson.Extension;
 import hudson.model.Action;
-import hudson.model.BuildableItem;
+import hudson.model.Item;
 import jenkins.model.TransientActionFactory;
 
 import javax.annotation.Nonnull;
@@ -14,16 +14,16 @@ import java.util.Collections;
  * on 14/07/2018.
  */
 @Extension
-public class ShelveProjectActionFactory extends TransientActionFactory<BuildableItem> {
+public class ShelveProjectActionFactory extends TransientActionFactory<Item> {
 
-    @Override
-    public Class<BuildableItem> type() {
-        return BuildableItem.class;
-    }
+  @Override
+  public Class<Item> type() {
+    return Item.class;
+  }
 
-    @Nonnull
-    @Override
-    public Collection<? extends Action> createFor(@Nonnull BuildableItem target) {
-        return Collections.singleton(new ShelveProjectAction(target));
-    }
+  @Nonnull
+  @Override
+  public Collection<? extends Action> createFor(@Nonnull Item target) {
+    return Collections.singleton(new ShelveProjectAction(target));
+  }
 }
