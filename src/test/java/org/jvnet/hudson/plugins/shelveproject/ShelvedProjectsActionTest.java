@@ -1,21 +1,25 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
 import hudson.model.Hudson;
+import hudson.model.Item;
+import hudson.model.User;
+import hudson.security.ACL;
+import jenkins.model.Jenkins;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.After;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
+import org.jvnet.hudson.test.MockAuthorizationStrategy;
 
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+
+import static org.junit.Assert.*;
 
 @SuppressWarnings({"ResultOfMethodCallIgnored"})
 public class ShelvedProjectsActionTest {
@@ -27,19 +31,21 @@ public class ShelvedProjectsActionTest {
 
 
     @Before
-    public void setUp()
-            throws Exception {
-        //super.setUp();
+    public void setUp() {
         shelvedProjectsAction = new ShelvedProjectsAction();
         shelvedProjectsDir = new File(Hudson.getInstance().getRootDir(), "shelvedProjects");
         shelvedProjectsDir.mkdirs();
+        jenkinsRule.jenkins.setSecurityRealm(jenkinsRule.createDummySecurityRealm());
+        jenkinsRule.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy().
+                grant(Jenkins.ADMINISTER).everywhere().to("admin").
+                grant(Jenkins.READ, Item.DELETE).everywhere().to("developer").
+                grant(Jenkins.READ, Item.CREATE).everywhere().to("creator").
+                grant(Jenkins.READ).everywhere().to("reader"));
+        ACL.as(User.get("admin"));
     }
 
     @After
-    public void tearDown()
-            throws Exception {
-        //super.tearDown();
-
+    public void tearDown() {
         shelvedProjectsDir.delete();
     }
 
@@ -50,8 +56,7 @@ public class ShelvedProjectsActionTest {
     }
 
     @Test
-    public void testGetShelvedProjects_shouldReturnShelvedProject()
-            throws IOException {
+    public void testGetShelvedProjects_shouldReturnShelvedProject() throws IOException {
         FileUtils.touch(new File(shelvedProjectsDir, "blackMesaProject-1262634114828.zip"));
 
         List<ShelvedProject> shelvedProjects = shelvedProjectsAction.getShelvedProjects();
@@ -115,5 +120,40 @@ public class ShelvedProjectsActionTest {
                 "YYY", shelvedProjects.get(4).getProjectName());
         assertEquals("Project list should have been sorted alphabetically.",
                 "zzz", shelvedProjects.get(5).getProjectName());
+    }
+
+    @Issue("JENKINS-55462")
+    @Test(expected = hudson.security.AccessDeniedException2.class)
+    public void testGetShelvedProjectsWithNoAdminRightsShouldThrow() throws IOException {
+        ACL.as(User.get("reader"));
+        FileUtils.touch(new File(shelvedProjectsDir, "one-project.zip"));
+        shelvedProjectsAction.getShelvedProjects();
+    }
+
+    @Issue("JENKINS-55462")
+    @Test(expected = hudson.security.AccessDeniedException2.class)
+    public void testGetShelvedProjectsWithOnlyCreateRightsShouldThrow() throws IOException {
+        ACL.as(User.get("creator"));
+        FileUtils.touch(new File(shelvedProjectsDir, "one-project.zip"));
+        shelvedProjectsAction.getShelvedProjects();
+    }
+
+
+    @Issue("JENKINS-55462")
+    @Test
+    public void testUnShelveIconShouldBeVisibleForAdmin() {
+        ACL.as(User.get("admin"));
+        assertNotNull("Shelve icon should be visible", new ShelvedProjectsAction().getIconFileName());
+    }
+
+    @Issue("JENKINS-55462")
+    @Test
+    public void testShelveIconShouldNotBeVisibleForOtherUsers() {
+        ACL.as(User.get("developer"));
+        assertNull("Shelve icon should not be visible", new ShelvedProjectsAction().getIconFileName());
+        ACL.as(User.get("creator"));
+        assertNull("Shelve icon should not be visible", new ShelvedProjectsAction().getIconFileName());
+        ACL.as(User.get("reader"));
+        assertNull("Shelve icon should not be visible", new ShelvedProjectsAction().getIconFileName());
     }
 }
