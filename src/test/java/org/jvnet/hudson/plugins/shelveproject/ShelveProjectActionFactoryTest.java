@@ -35,7 +35,7 @@ public class ShelveProjectActionFactoryTest {
     @Issue("JENKINS-26432")
     @Test
     public void theFactoryShouldReturnASingleShelveProjectActionForAPipelineJob() {
-        Collection<? extends Action> actions = new ShelveProjectActionFactory().createFor(new WorkflowJob( null, "my-pipeline"));
+        Collection<? extends Action> actions = new ShelveProjectActionFactory().createFor(new WorkflowJob(null, "my-pipeline"));
         assertEquals("Only one action expected", 1, actions.size());
         assertTrue("Action should be of type " + ShelveProjectAction.class, actions.toArray(new Object[0])[0] instanceof ShelveProjectAction);
     }

@@ -16,32 +16,26 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class DeleteProjectTask
-    implements Queue.FlyweightTask, Queue.TransientTask
-{
+        implements Queue.FlyweightTask, Queue.TransientTask {
     private final String[] shelvedProjectArchiveNames;
 
-    DeleteProjectTask(String[] shelvedProjectArchiveNames)
-    {
+    DeleteProjectTask(String[] shelvedProjectArchiveNames) {
         this.shelvedProjectArchiveNames = shelvedProjectArchiveNames;
     }
 
-    public Label getAssignedLabel()
-    {
+    public Label getAssignedLabel() {
         return null;
     }
 
-    public Node getLastBuiltOn()
-    {
+    public Node getLastBuiltOn() {
         return null;
     }
 
-    public boolean isBuildBlocked()
-    {
+    public boolean isBuildBlocked() {
         return false;
     }
 
-    public String getWhyBlocked()
-    {
+    public String getWhyBlocked() {
         return null;
     }
 
@@ -49,70 +43,57 @@ public class DeleteProjectTask
         return null;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return "Deleting Project";
     }
 
-    public String getFullDisplayName()
-    {
+    public String getFullDisplayName() {
         return getName();
     }
 
-    public long getEstimatedDuration()
-    {
+    public long getEstimatedDuration() {
         return -1;
     }
 
     public Queue.Executable createExecutable()
-        throws IOException
-    {
+            throws IOException {
         return new DeleteProjectExecutable(this, shelvedProjectArchiveNames);
     }
 
-    public Queue.Task getOwnerTask()
-    {
+    public Queue.Task getOwnerTask() {
         return this;
     }
 
-    public Object getSameNodeConstraint()
-    {
+    public Object getSameNodeConstraint() {
         return null;
     }
 
-    public void checkAbortPermission()
-    {
+    public void checkAbortPermission() {
     }
 
-    public boolean hasAbortPermission()
-    {
+    public boolean hasAbortPermission() {
         return false;
     }
 
-    public String getUrl()
-    {
+    public String getUrl() {
         return null;
     }
 
-    public boolean isConcurrentBuild()
-    {
+    public boolean isConcurrentBuild() {
         return false;
     }
 
-    public Collection<? extends SubTask> getSubTasks()
-    {
+    public Collection<? extends SubTask> getSubTasks() {
         final List<SubTask> subTasks = new LinkedList<SubTask>();
         subTasks.add(this);
         return subTasks;
     }
 
-    public ResourceList getResourceList()
-    {
+    public ResourceList getResourceList() {
         return new ResourceList();
     }
 
-    public String getDisplayName()
-    {
+    public String getDisplayName() {
         return getName();
     }
 

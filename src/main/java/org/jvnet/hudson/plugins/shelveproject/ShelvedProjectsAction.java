@@ -33,25 +33,19 @@ import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.*;
 @ExportedBean(defaultVisibility = 999)
 @Extension
 public class ShelvedProjectsAction
-    implements RootAction
-{
-    private final static Logger LOGGER = Logger.getLogger( ShelvedProjectsAction.class.getName() );
+        implements RootAction {
+    private final static Logger LOGGER = Logger.getLogger(ShelvedProjectsAction.class.getName());
     static final String SHELVED_PROJECTS_DIRECTORY = "shelvedProjects";
 
-    public String getIconFileName()
-    {
-        if ( Hudson.getInstance().hasPermission( Permission.CREATE ) )
-        {
+    public String getIconFileName() {
+        if (Hudson.getInstance().hasPermission(Permission.CREATE)) {
             return "/plugin/shelve-project-plugin/icons/shelve-project-icon.png";
-        }
-        else
-        {
+        } else {
             return null;
         }
     }
 
-    public String getDisplayName()
-    {
+    public String getDisplayName() {
         return "Shelved Projects";
     }
 
@@ -77,7 +71,7 @@ public class ShelvedProjectsAction
                     super.visitFile(file, attrs);
                     if (legacyMatcher.matches(file)) {
                         projects.add(getLegacyShelvedProjectFromArchive(file.toFile()));
-                    } else if(matcher.matches(file)) {
+                    } else if (matcher.matches(file)) {
                         projects.add(getShelvedProjectFromArchive(file.toFile()));
                     }
                     return FileVisitResult.CONTINUE;
@@ -91,14 +85,11 @@ public class ShelvedProjectsAction
         return projects;
     }
 
-    private void sortProjectsAlphabetically(final List<ShelvedProject> projects)
-    {
+    private void sortProjectsAlphabetically(final List<ShelvedProject> projects) {
         final Collator collator = Collator.getInstance();
 
-        Collections.sort(projects, new Comparator<ShelvedProject>()
-        {
-            public int compare(ShelvedProject project1, ShelvedProject project2)
-            {
+        Collections.sort(projects, new Comparator<ShelvedProject>() {
+            public int compare(ShelvedProject project1, ShelvedProject project2) {
                 return collator.compare(project1.getProjectName(), project2.getProjectName());
             }
         });
@@ -108,23 +99,21 @@ public class ShelvedProjectsAction
         return ShelvedProject.createFromTar(archive);
     }
 
-    private ShelvedProject getLegacyShelvedProjectFromArchive(File archive )
-    {
+    private ShelvedProject getLegacyShelvedProjectFromArchive(File archive) {
         ShelvedProject shelvedProject = new ShelvedProject();
-        shelvedProject.setProjectName( StringUtils.substringBeforeLast( archive.getName(), "-" ) );
-        shelvedProject.setTimestamp( Long.parseLong(
-            StringUtils.substringBefore( StringUtils.substringAfterLast( archive.getName(), "-" ), "." ) ) );
-        shelvedProject.setArchive( archive );
-        shelvedProject.setFormatedDate( formatDate( shelvedProject.getTimestamp() ) );
+        shelvedProject.setProjectName(StringUtils.substringBeforeLast(archive.getName(), "-"));
+        shelvedProject.setTimestamp(Long.parseLong(
+                StringUtils.substringBefore(StringUtils.substringAfterLast(archive.getName(), "-"), ".")));
+        shelvedProject.setArchive(archive);
+        shelvedProject.setFormatedDate(formatDate(shelvedProject.getTimestamp()));
         return shelvedProject;
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
-    public HttpResponse doManageShelvedProject( StaplerRequest request,
-                                           StaplerResponse response )
-        throws IOException, ServletException
-    {
-        if(request.hasParameter("unshelve"))
+    public HttpResponse doManageShelvedProject(StaplerRequest request,
+                                               StaplerResponse response)
+            throws IOException, ServletException {
+        if (request.hasParameter("unshelve"))
             return unshelveProject(request);
         else if (request.hasParameter("delete"))
             return deleteProject(request);
@@ -132,51 +121,46 @@ public class ShelvedProjectsAction
     }
 
     private HttpResponse unshelveProject(StaplerRequest request) {
-        Hudson.getInstance().checkPermission( Permission.CREATE );
+        Hudson.getInstance().checkPermission(Permission.CREATE);
 
         final String[] archives = request.getParameterValues("archives");
-        if (archives == null)
-        {
+        if (archives == null) {
             return createRedirectToShelvedProjectsPage();
         }
 
         LOGGER.info("Unshelving archived projects.");
         // Unshelving the project could take some time, so add it as a task
-        Hudson.getInstance().getQueue().schedule( new UnshelveProjectTask( archives ), 0 );
+        Hudson.getInstance().getQueue().schedule(new UnshelveProjectTask(archives), 0);
 
         return createRedirectToMainPage();
     }
 
     private HttpResponse deleteProject(StaplerRequest request) {
-        Hudson.getInstance().checkPermission( Permission.DELETE );
+        Hudson.getInstance().checkPermission(Permission.DELETE);
 
         final String[] archives = request.getParameterValues("archives");
-        if (archives == null)
-        {
+        if (archives == null) {
             return createRedirectToShelvedProjectsPage();
         }
 
         LOGGER.info("Deleting archived projects.");
         // Deleting the project could take some time, so add it as a task
-        Hudson.getInstance().getQueue().schedule( new DeleteProjectTask(archives), 0 );
+        Hudson.getInstance().getQueue().schedule(new DeleteProjectTask(archives), 0);
 
         return createRedirectToShelvedProjectsPage();
     }
 
     // TODO this will need some cleaning, outside of the scope of this dev
-    public static String formatDate( long timestamp )
-    {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "EEE, d MMM yyyy HH:mm:ss Z" );
-        return simpleDateFormat.format( new Date( timestamp ) );
+    public static String formatDate(long timestamp) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+        return simpleDateFormat.format(new Date(timestamp));
     }
 
-    private HttpResponse createRedirectToShelvedProjectsPage()
-    {
-        return new HttpRedirect( Hudson.getInstance().getRootUrl() + this.getUrlName() );
+    private HttpResponse createRedirectToShelvedProjectsPage() {
+        return new HttpRedirect(Hudson.getInstance().getRootUrl() + this.getUrlName());
     }
 
-    private HttpRedirect createRedirectToMainPage()
-    {
-        return new HttpRedirect( Hudson.getInstance().getRootUrl() );
+    private HttpRedirect createRedirectToMainPage() {
+        return new HttpRedirect(Hudson.getInstance().getRootUrl());
     }
 }

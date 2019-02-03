@@ -30,32 +30,31 @@ import static org.junit.Assert.assertTrue;
 import static org.jvnet.hudson.plugins.shelveproject.ShelvedProjectsAction.*;
 
 /**
- *
  * @author ben.patterson
  */
 public class ShelveProjectExecutableTest {
-   private Queue.Task parentTask;
+    private Queue.Task parentTask;
 
     @Rule
     public JenkinsRule jenkinsRule = new JenkinsRule();
 
     @Test
     public void testProjectTarIsCreated() throws Exception {
-        
+
         String projectname = "ProjectWithWorkspace";
 
         FreeStyleProject project = jenkinsRule.createFreeStyleProject(projectname);
         project.getBuildersList().add(new Shell("echo hello"));
-        
+
         FreeStyleBuild b = project.scheduleBuild2(0).get();
 
         assertTrue("Workspace should exist by now",
                 b.getWorkspace().exists());
-        
-        File shelvedProjectsDir = new File( Hudson.getInstance().getRootDir(), "shelvedProjects" );
+
+        File shelvedProjectsDir = new File(Hudson.getInstance().getRootDir(), "shelvedProjects");
         shelvedProjectsDir.mkdirs();
-        
-        ShelveProjectExecutable a = new ShelveProjectExecutable (parentTask,project);
+
+        ShelveProjectExecutable a = new ShelveProjectExecutable(parentTask, project);
         a.run();
 
         DeleteProjectExecutableTest.FileExplorerVisitor fileExplorerVisitor = new DeleteProjectExecutableTest.FileExplorerVisitor();
@@ -65,7 +64,7 @@ public class ShelveProjectExecutableTest {
         assertEquals("Not the expected number of metadata archives", 1, fileExplorerVisitor.getMetadataFileCount());
 
     }
-    
+
     @Issue("JENKINS-43434")
     @Test
     public void testProjectInFolderContainsTheCorrectMetadata() throws IOException {
@@ -74,10 +73,10 @@ public class ShelveProjectExecutableTest {
         MockFolder myFolder = jenkinsRule.createFolder("myFolder");
         FreeStyleProject project = myFolder.createProject(FreeStyleProject.class, projectName);
 
-        ShelveProjectExecutable a = new ShelveProjectExecutable (null,project);
+        ShelveProjectExecutable a = new ShelveProjectExecutable(null, project);
         a.run();
 
-        File shelvedProjectsDir = new File( Jenkins.getInstance().getRootDir(), SHELVED_PROJECTS_DIRECTORY);
+        File shelvedProjectsDir = new File(Jenkins.getInstance().getRootDir(), SHELVED_PROJECTS_DIRECTORY);
 
         DeleteProjectExecutableTest.FileExplorerVisitor fileExplorerVisitor = new DeleteProjectExecutableTest.FileExplorerVisitor();
         Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
