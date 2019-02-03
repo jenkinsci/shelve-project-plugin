@@ -15,22 +15,19 @@ import java.util.logging.Logger;
 import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.ARCHIVE_FILE_EXTENSION;
 
 public class DeleteProjectExecutable
-    implements Queue.Executable
-{
-    private final static Logger LOGGER = Logger.getLogger( DeleteProjectExecutable.class.getName() );
+        implements Queue.Executable {
+    private final static Logger LOGGER = Logger.getLogger(DeleteProjectExecutable.class.getName());
 
     private final String[] shelvedProjectArchiveNames;
 
     private final Queue.Task parentTask;
 
-    DeleteProjectExecutable(Queue.Task parentTask, String[] shelvedProjectArchiveNames)
-    {
+    DeleteProjectExecutable(Queue.Task parentTask, String[] shelvedProjectArchiveNames) {
         this.parentTask = parentTask;
         this.shelvedProjectArchiveNames = shelvedProjectArchiveNames;
     }
 
-    public Queue.Task getParent()
-    {
+    public Queue.Task getParent() {
         return parentTask;
     }
 
@@ -39,7 +36,7 @@ public class DeleteProjectExecutable
             final File shelvedProjectArchive = getArchiveFile(shelvedProjectArchiveName);
             LOGGER.info("Deleting project [" + shelvedProjectArchiveName + "].");
             try {
-                if(ARCHIVE_FILE_EXTENSION.equals(FilenameUtils.getExtension(shelvedProjectArchiveName))) {
+                if (ARCHIVE_FILE_EXTENSION.equals(FilenameUtils.getExtension(shelvedProjectArchiveName))) {
                     Files.delete(ShelvedProject.getMetadataFileFromArchive(shelvedProjectArchive));
                 }
                 Files.delete(shelvedProjectArchive.toPath());
@@ -62,14 +59,12 @@ public class DeleteProjectExecutable
         return null; // Project was already unshelved?
     }
 
-    public long getEstimatedDuration()
-    {
+    public long getEstimatedDuration() {
         return -1; // impossible to estimate duration
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "Deleting Project";
     }
 }

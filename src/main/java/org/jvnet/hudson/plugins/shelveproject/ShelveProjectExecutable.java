@@ -57,7 +57,7 @@ public class ShelveProjectExecutable
 
     public String getTimestampString() {
         Executor executor = Executor.of(this);
-        if(executor != null) {
+        if (executor != null) {
             return executor.getTimestampString();
         }
         return "N/A";
@@ -107,7 +107,7 @@ public class ShelveProjectExecutable
         }
     }
 
-    private static String escapeForPropertiesFile(@Nonnull  String path) {
+    private static String escapeForPropertiesFile(@Nonnull String path) {
         // Windows is using \ while it's an escape character in properties files
         return path.replaceAll("\\\\", java.util.regex.Matcher.quoteReplacement("\\\\"));
     }
@@ -127,7 +127,7 @@ public class ShelveProjectExecutable
     private List<String> createListOfFoldersToBackup() {
         List<String> regexp = new ArrayList<>();
         Plugin folderPlugin = Jenkins.getInstance().getPlugin("cloudbees-folder");
-        if(folderPlugin != null && folderPlugin.getWrapper().isActive()) {
+        if (folderPlugin != null && folderPlugin.getWrapper().isActive()) {
             ItemGroup parent = item.getParent();
             // technically not using Folder plugin code, but in practice, the Folder plugin code should be there for this
             // situation to occur.
@@ -152,7 +152,7 @@ public class ShelveProjectExecutable
     private void wipeoutWorkspace() {
         LOGGER.info("Wiping out workspace for project [" + item.getName() + "].");
         try {
-            if(item instanceof AbstractProject) {
+            if (item instanceof AbstractProject) {
                 ((AbstractProject) item).doDoWipeOutWorkspace();
             }
             // there is no API to do this in the case of Pipelines: https://issues.jenkins-ci.org/browse/JENKINS-26138
@@ -164,7 +164,7 @@ public class ShelveProjectExecutable
     private void deleteProject() {
         LOGGER.info("Deleting project [" + item.getName() + "].");
         try {
-           item.delete();
+            item.delete();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Could not delete project [" + item.getName() + "].", e);
         }

@@ -17,22 +17,19 @@ import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.*;
 import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.PROJECT_PATH_PROPERTY;
 
 public class UnshelveProjectExecutable
-    implements Queue.Executable
-{
-    private final static Logger LOGGER = Logger.getLogger( UnshelveProjectExecutable.class.getName() );
+        implements Queue.Executable {
+    private final static Logger LOGGER = Logger.getLogger(UnshelveProjectExecutable.class.getName());
 
     private final String[] shelvedProjectArchiveNames;
 
     private final Queue.Task parentTask;
 
-    UnshelveProjectExecutable( Queue.Task parentTask, String[] shelvedProjectArchiveNames )
-    {
+    UnshelveProjectExecutable(Queue.Task parentTask, String[] shelvedProjectArchiveNames) {
         this.parentTask = parentTask;
         this.shelvedProjectArchiveNames = shelvedProjectArchiveNames;
     }
 
-    public Queue.Task getParent()
-    {
+    public Queue.Task getParent() {
         return parentTask;
     }
 
@@ -42,16 +39,16 @@ public class UnshelveProjectExecutable
             LOGGER.info("Unshelving project [" + shelvedProjectArchiveName + "].");
             boolean correctlyExploded;
             try {
-                if(ARCHIVE_FILE_EXTENSION.equals(FilenameUtils.getExtension(shelvedProjectArchiveName))) {
+                if (ARCHIVE_FILE_EXTENSION.equals(FilenameUtils.getExtension(shelvedProjectArchiveName))) {
                     correctlyExploded = explode(shelvedProjectArchive);
-                    if(correctlyExploded) {
+                    if (correctlyExploded) {
                         Files.delete(ShelvedProject.getMetadataFileFromArchive(shelvedProjectArchive));
                     }
                 } else {
                     legacyExplode(shelvedProjectArchive);
                     correctlyExploded = true;
                 }
-                if(correctlyExploded) {
+                if (correctlyExploded) {
                     Files.delete(shelvedProjectArchive.toPath());
                 } else {
                     LOGGER.log(Level.INFO, "Skipping deletion of the backup at " + shelvedProjectArchiveName);
@@ -83,15 +80,12 @@ public class UnshelveProjectExecutable
     }
 
 
-
-    public long getEstimatedDuration()
-    {
+    public long getEstimatedDuration() {
         return -1; // impossible to estimate duration
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "Unshelving Project";
     }
 }

@@ -12,9 +12,8 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 public class ShelveProjectAction
-    implements Action
-{
-    private final static Logger LOGGER = Logger.getLogger( ShelveProjectAction.class.getName() );
+        implements Action {
+    private final static Logger LOGGER = Logger.getLogger(ShelveProjectAction.class.getName());
 
     private BuildableItem item;
 
@@ -33,13 +32,11 @@ public class ShelveProjectAction
         }
     }
 
-    public String getDisplayName()
-    {
+    public String getDisplayName() {
         return "Shelve Project";
     }
 
-    public String getUrlName()
-    {
+    public String getUrlName() {
         return "shelve";
     }
 
@@ -47,28 +44,24 @@ public class ShelveProjectAction
         return item;
     }
 
-    public boolean isShelvingProject()
-    {
+    public boolean isShelvingProject() {
         return isShelvingProject;
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
     public HttpResponse doShelveProject()
-        throws IOException, ServletException
-    {
-        Jenkins.getInstance().checkPermission( Permission.DELETE );
-        if ( !isShelvingProject() )
-        {
-            LOGGER.info( "Shelving project [" + getItem().getName() + "]." );
+            throws IOException, ServletException {
+        Jenkins.getInstance().checkPermission(Permission.DELETE);
+        if (!isShelvingProject()) {
+            LOGGER.info("Shelving project [" + getItem().getName() + "].");
             // Shelving the project could take some time, so add it as a task
-            Jenkins.getInstance().getQueue().schedule( new ShelveProjectTask(item), 0 );
+            Jenkins.getInstance().getQueue().schedule(new ShelveProjectTask(item), 0);
         }
 
         return createRedirectToMainPage();
     }
 
-    private HttpRedirect createRedirectToMainPage()
-    {
-        return new HttpRedirect( Jenkins.getInstance().getRootUrl() );
+    private HttpRedirect createRedirectToMainPage() {
+        return new HttpRedirect(Jenkins.getInstance().getRootUrl());
     }
 }
