@@ -15,11 +15,19 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-public class UnshelveProjectTask
-        implements Queue.FlyweightTask, Queue.TransientTask {
+/**
+ * Represents a lightweight task that will take care of Unshelving the shelved archives.
+ * Creates a {@link UnshelveProjectExecutable} in charge of the actual unshelve operations.
+ */
+public class UnshelveProjectTask implements Queue.FlyweightTask, Queue.TransientTask {
     private final String[] shelvedProjectArchiveNames;
 
-    UnshelveProjectTask(String[] shelvedProjectArchiveNames) {
+    /**
+     * Creates a {@link UnshelveProjectTask}
+     *
+     * @param shelvedProjectArchiveNames The list of shelve archives to treat
+     */
+    public UnshelveProjectTask(String[] shelvedProjectArchiveNames) {
         this.shelvedProjectArchiveNames = shelvedProjectArchiveNames;
     }
 

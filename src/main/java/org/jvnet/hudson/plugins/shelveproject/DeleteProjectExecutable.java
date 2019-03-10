@@ -14,15 +14,27 @@ import java.util.logging.Logger;
 
 import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.ARCHIVE_FILE_EXTENSION;
 
-public class DeleteProjectExecutable
-        implements Queue.Executable {
+/**
+ * A {@link Queue.Executable} that will take care of removing the provided shelvedProjects/
+ *
+ * This executable will take care of deleting both the list of archive provided and also their
+ * associated metadata file (if relevant)
+ *
+ */
+public class DeleteProjectExecutable implements Queue.Executable {
     private final static Logger LOGGER = Logger.getLogger(DeleteProjectExecutable.class.getName());
 
     private final String[] shelvedProjectArchiveNames;
 
     private final Queue.Task parentTask;
 
-    DeleteProjectExecutable(Queue.Task parentTask, String[] shelvedProjectArchiveNames) {
+    /**
+     * Creates a {@link DeleteProjectExecutable}.
+     *
+     * @param parentTask The task from which the executable was created. Most likely {@link DeleteProjectTask}
+     * @param shelvedProjectArchiveNames The list of shelve archives to delete
+     */
+    public DeleteProjectExecutable(Queue.Task parentTask, String[] shelvedProjectArchiveNames) {
         this.parentTask = parentTask;
         this.shelvedProjectArchiveNames = shelvedProjectArchiveNames;
     }

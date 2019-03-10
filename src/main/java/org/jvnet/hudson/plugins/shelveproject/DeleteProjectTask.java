@@ -15,11 +15,20 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-public class DeleteProjectTask
-        implements Queue.FlyweightTask, Queue.TransientTask {
+/**
+ * Represents a lightweight task that will take care of Deleting shelved archives.
+ * Creates a {@link DeleteProjectExecutable} in charge of the actual deletion
+ *
+ */
+public class DeleteProjectTask implements Queue.FlyweightTask, Queue.TransientTask {
     private final String[] shelvedProjectArchiveNames;
 
-    DeleteProjectTask(String[] shelvedProjectArchiveNames) {
+    /**
+     * Creates a {@link DeleteProjectTask}
+     *
+     * @param shelvedProjectArchiveNames The list of shelve archives to delete
+     */
+    public DeleteProjectTask(String[] shelvedProjectArchiveNames) {
         this.shelvedProjectArchiveNames = shelvedProjectArchiveNames;
     }
 
