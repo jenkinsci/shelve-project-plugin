@@ -8,6 +8,7 @@ import hudson.model.BuildableItem;
 import hudson.model.Executor;
 import hudson.model.ItemGroup;
 import hudson.model.Queue;
+import hudson.util.io.ArchiverFactory;
 import jenkins.model.Jenkins;
 
 import javax.annotation.Nonnull;
@@ -31,6 +32,7 @@ public class ShelveProjectExecutable
     static final String PROJECT_FULL_NAME_PROPERTY = "project.fullname";
     static final String PROJECT_NAME_PROPERTY = "project.name";
     static final String ARCHIVE_TIME_PROPERTY = "archive.time";
+    static final String ARCHIVE_COMPRESSION = "archive.compression";
 
     private final BuildableItem item;
 
@@ -101,6 +103,7 @@ public class ShelveProjectExecutable
             addNewProperty(writer, PROJECT_NAME_PROPERTY, item.getName());
             addNewProperty(writer, ARCHIVE_TIME_PROPERTY, Long.toString(archiveTime));
             addNewProperty(writer, PROJECT_FULL_NAME_PROPERTY, item.getFullName());
+            addNewProperty(writer, ARCHIVE_COMPRESSION, "true");
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Could not write metadata for project [" + item.getName() + "].", e);
             throw e;
@@ -120,7 +123,7 @@ public class ShelveProjectExecutable
     // could probably be integrated in FilePath
     private static void tar(FilePath origin, FilePath dst, String glob) throws IOException, InterruptedException {
         try (OutputStream os = dst.write()) {
-            origin.tar(os, glob);
+            origin.archive(ArchiverFactory.TARGZ, os, glob);
         }
     }
 

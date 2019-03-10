@@ -7,13 +7,17 @@ import hudson.model.FreeStyleBuild;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.junit.Assert;
 import org.junit.Rule;
 
 import hudson.tasks.Shell;
 import hudson.model.Queue;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,6 +31,7 @@ import org.jvnet.hudson.test.MockFolder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.ARCHIVE_COMPRESSION;
 import static org.jvnet.hudson.plugins.shelveproject.ShelvedProjectsAction.*;
 
 /**
@@ -119,5 +124,49 @@ public class ShelveProjectExecutableTest {
         WorkflowJob project = jenkinsRule.createProject(WorkflowJob.class, "my-pipeline");
         ShelveProjectExecutable executable = new ShelveProjectExecutable(null, project);
         assertEquals("Not the expected duration", "N/A", executable.getTimestampString());
+    }
+
+    @Issue("JENKINS-55244")
+    @Test
+    public void aShelvedProjectShouldBeCompressed() throws IOException {
+        WorkflowJob project = jenkinsRule.createProject(WorkflowJob.class, "my-pipeline");
+        File shelvedProjectsDir = new File(Jenkins.getInstance().getRootDir(), SHELVED_PROJECTS_DIRECTORY);
+        shelvedProjectsDir.mkdirs();
+
+        ShelveProjectExecutable executable = new ShelveProjectExecutable(null, project);
+        executable.run();
+
+        DeleteProjectExecutableTest.FileExplorerVisitor fileExplorerVisitor = new DeleteProjectExecutableTest.FileExplorerVisitor();
+        Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
+
+        String archivePath = fileExplorerVisitor.getArchives()[0];
+        InputStream is = new FileInputStream(shelvedProjectsDir.toPath().resolve(archivePath).toFile());
+        byte[] fileAsBit = new byte[2];
+        is.read(fileAsBit);
+        assertEquals("Not the expected first byte for a gzip file", 0x1f, fileAsBit[0]);
+        assertEquals("Not the expected second byte for a gzip file", (byte)0x8b, fileAsBit[1]);
+    }
+
+    @Issue("JENKINS-55244")
+    @Test
+    public void aShelvedProjectMetadatafileShouldIndicateItsCompressed() throws IOException {
+        WorkflowJob project = jenkinsRule.createProject(WorkflowJob.class, "my-pipeline");
+        File shelvedProjectsDir = new File(Jenkins.getInstance().getRootDir(), SHELVED_PROJECTS_DIRECTORY);
+        shelvedProjectsDir.mkdirs();
+
+        ShelveProjectExecutable executable = new ShelveProjectExecutable(null, project);
+        executable.run();
+
+        DeleteProjectExecutableTest.FileExplorerVisitor fileExplorerVisitor = new DeleteProjectExecutableTest.FileExplorerVisitor();
+        Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
+
+        Path metadataPath = fileExplorerVisitor.getMetadata().get(0);
+        Properties shelveProperties = new Properties();
+        try (BufferedReader reader = Files.newBufferedReader(metadataPath)) {
+            shelveProperties.load(reader);
+
+        }
+        String archiveCompressionProperty = shelveProperties.getProperty(ARCHIVE_COMPRESSION, "false");
+        Assert.assertTrue("metada  file should indicate the archive is compressed", Boolean.parseBoolean(archiveCompressionProperty));
     }
 }

@@ -65,12 +65,13 @@ public class UnshelveProjectExecutable
         Properties metadata = ShelvedProject.loadMetadata(shelvedProjectArchive);
         String projectPathProperty = metadata.getProperty(PROJECT_PATH_PROPERTY);
         Path projectPath = rootDir.toPath().resolve(projectPathProperty);
+        boolean isCompressedArchive = Boolean.parseBoolean(metadata.getProperty(ARCHIVE_COMPRESSION, "false"));
         if (Files.exists(projectPath)) {
             LOGGER.log(Level.INFO, "A project exist for the given path " + projectPathProperty + "...skipping");
             return false;
         }
         new FilePath(shelvedProjectArchive).untar(
-                new FilePath(new File(rootDir, "jobs")), FilePath.TarCompression.NONE);
+                new FilePath(new File(rootDir, "jobs")), isCompressedArchive ? FilePath.TarCompression.GZIP : FilePath.TarCompression.NONE);
         return true;
     }
 
