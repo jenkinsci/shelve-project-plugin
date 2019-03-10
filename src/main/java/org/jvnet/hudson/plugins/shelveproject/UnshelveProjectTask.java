@@ -11,6 +11,7 @@ import org.acegisecurity.Authentication;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,7 +29,8 @@ public class UnshelveProjectTask implements Queue.FlyweightTask, Queue.Transient
      * @param shelvedProjectArchiveNames The list of shelve archives to treat
      */
     public UnshelveProjectTask(String[] shelvedProjectArchiveNames) {
-        this.shelvedProjectArchiveNames = shelvedProjectArchiveNames;
+        this.shelvedProjectArchiveNames = shelvedProjectArchiveNames != null ?
+                Arrays.copyOf(shelvedProjectArchiveNames, shelvedProjectArchiveNames.length) : null;
     }
 
     public Label getAssignedLabel() {

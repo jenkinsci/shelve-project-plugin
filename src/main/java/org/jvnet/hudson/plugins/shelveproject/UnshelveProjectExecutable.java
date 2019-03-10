@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,10 +18,9 @@ import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.*;
 import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.PROJECT_PATH_PROPERTY;
 
 /**
- *  A {@link Queue.Executable} that will take care of unshelving projects.
- *
- *  Selected projects will be copied back under $JENKINS_HOME/jobs and the model will be reloaded.
- *
+ * A {@link Queue.Executable} that will take care of unshelving projects.
+ * <p>
+ * Selected projects will be copied back under $JENKINS_HOME/jobs and the model will be reloaded.
  */
 public class UnshelveProjectExecutable implements Queue.Executable {
     private final static Logger LOGGER = Logger.getLogger(UnshelveProjectExecutable.class.getName());
@@ -32,12 +32,13 @@ public class UnshelveProjectExecutable implements Queue.Executable {
     /**
      * Creates a new {@link UnshelveProjectExecutable}
      *
-     * @param parentTask The task from which the executable was created. Most likely {@link UnshelveProjectTask}
+     * @param parentTask                 The task from which the executable was created. Most likely {@link UnshelveProjectTask}
      * @param shelvedProjectArchiveNames The list of shelve archives to treat
      */
     public UnshelveProjectExecutable(Queue.Task parentTask, String[] shelvedProjectArchiveNames) {
         this.parentTask = parentTask;
-        this.shelvedProjectArchiveNames = shelvedProjectArchiveNames;
+        this.shelvedProjectArchiveNames = shelvedProjectArchiveNames != null ?
+                Arrays.copyOf(shelvedProjectArchiveNames, shelvedProjectArchiveNames.length) : null;
     }
 
     public Queue.Task getParent() {

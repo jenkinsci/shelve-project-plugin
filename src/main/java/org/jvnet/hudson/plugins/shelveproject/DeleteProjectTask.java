@@ -11,6 +11,7 @@ import org.acegisecurity.Authentication;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +19,6 @@ import java.util.List;
 /**
  * Represents a lightweight task that will take care of Deleting shelved archives.
  * Creates a {@link DeleteProjectExecutable} in charge of the actual deletion
- *
  */
 public class DeleteProjectTask implements Queue.FlyweightTask, Queue.TransientTask {
     private final String[] shelvedProjectArchiveNames;
@@ -29,7 +29,8 @@ public class DeleteProjectTask implements Queue.FlyweightTask, Queue.TransientTa
      * @param shelvedProjectArchiveNames The list of shelve archives to delete
      */
     public DeleteProjectTask(String[] shelvedProjectArchiveNames) {
-        this.shelvedProjectArchiveNames = shelvedProjectArchiveNames;
+        this.shelvedProjectArchiveNames = shelvedProjectArchiveNames != null ?
+                Arrays.copyOf(shelvedProjectArchiveNames, shelvedProjectArchiveNames.length) : null;
     }
 
     public Label getAssignedLabel() {
