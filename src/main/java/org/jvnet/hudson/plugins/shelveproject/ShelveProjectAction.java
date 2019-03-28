@@ -2,6 +2,7 @@ package org.jvnet.hudson.plugins.shelveproject;
 
 import hudson.model.Action;
 import hudson.model.BuildableItem;
+import hudson.model.Item;
 import hudson.security.Permission;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.HttpRedirect;
@@ -11,25 +12,26 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-public class ShelveProjectAction
-        implements Action {
+public class ShelveProjectAction implements Action {
     private final static Logger LOGGER = Logger.getLogger(ShelveProjectAction.class.getName());
-
+    private static final Permission SHELVE_PERMISSION = Item.DELETE;
     private BuildableItem item;
 
     private boolean isShelvingProject;
+    private static final String ACTION_ICON_PATH = "/plugin/shelve-project-plugin/icons/shelve-project-icon.png";
 
     public ShelveProjectAction(BuildableItem item) {
         this.item = item;
         this.isShelvingProject = false;
     }
 
+    @Override
     public String getIconFileName() {
-        if (Jenkins.getInstance().hasPermission(Permission.DELETE)) {
-            return "/plugin/shelve-project-plugin/icons/shelve-project-icon.png";
-        } else {
-            return null;
-        }
+        return getShelveIconPath();
+    }
+
+    private static String getShelveIconPath() {
+        return Jenkins.getInstance().hasPermission(SHELVE_PERMISSION) ? ACTION_ICON_PATH : null;
     }
 
     public String getDisplayName() {
@@ -51,7 +53,7 @@ public class ShelveProjectAction
     @SuppressWarnings({"UnusedDeclaration"})
     public HttpResponse doShelveProject()
             throws IOException, ServletException {
-        Jenkins.getInstance().checkPermission(Permission.DELETE);
+        Jenkins.getInstance().checkPermission(Item.DELETE);
         if (!isShelvingProject()) {
             LOGGER.info("Shelving project [" + getItem().getName() + "].");
             // Shelving the project could take some time, so add it as a task
