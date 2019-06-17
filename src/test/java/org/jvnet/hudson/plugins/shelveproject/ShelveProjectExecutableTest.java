@@ -5,6 +5,9 @@ import hudson.model.Hudson;
 import hudson.model.FreeStyleProject;
 import hudson.model.FreeStyleBuild;
 import jenkins.model.Jenkins;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Assert;
@@ -144,7 +147,7 @@ public class ShelveProjectExecutableTest {
         byte[] fileAsBit = new byte[2];
         is.read(fileAsBit);
         assertEquals("Not the expected first byte for a gzip file", 0x1f, fileAsBit[0]);
-        assertEquals("Not the expected second byte for a gzip file", (byte)0x8b, fileAsBit[1]);
+        assertEquals("Not the expected second byte for a gzip file", (byte) 0x8b, fileAsBit[1]);
     }
 
     @Issue("JENKINS-55244")
@@ -168,5 +171,37 @@ public class ShelveProjectExecutableTest {
         }
         String archiveCompressionProperty = shelveProperties.getProperty(ARCHIVE_COMPRESSION, "false");
         Assert.assertTrue("metada  file should indicate the archive is compressed", Boolean.parseBoolean(archiveCompressionProperty));
+    }
+
+    @Issue("JENKINS-52781")
+    @Test
+    public void symlinksAreNotShelved() throws IOException, ExecutionException, InterruptedException {
+        FreeStyleProject project = jenkinsRule.createFreeStyleProject("project");
+        // we need to run one build to make sure the lastSuccessful link gets created
+        project.scheduleBuild2(0).get();
+
+        File shelvedProjectsDir = new File(Jenkins.getInstance().getRootDir(), "shelvedProjects");
+        shelvedProjectsDir.mkdirs();
+
+        ShelveProjectExecutable exe = new ShelveProjectExecutable(null, project);
+        exe.run();
+
+        DeleteProjectExecutableTest.FileExplorerVisitor fileExplorerVisitor = new DeleteProjectExecutableTest.FileExplorerVisitor();
+        Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
+
+        String[] archives = fileExplorerVisitor.getArchives();
+
+        assertEquals("Shelving should have created one archive", 1, archives.length);
+
+        try (TarArchiveInputStream archive = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(new File(shelvedProjectsDir, archives[0]))))) {
+            TarArchiveEntry entry;
+            String fileName;
+            while ((entry = archive.getNextTarEntry()) != null) {
+                fileName = entry.getName();
+                if (fileName.contains("lastSuccessful")) {
+                    Assert.fail("Found a lastSuccessful symlink, it should have been filtered out");
+                }
+            }
+        }
     }
 }

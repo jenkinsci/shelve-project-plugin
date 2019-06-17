@@ -8,8 +8,10 @@ import hudson.model.BuildableItem;
 import hudson.model.Executor;
 import hudson.model.ItemGroup;
 import hudson.model.Queue;
+import hudson.util.DirScanner;
 import hudson.util.io.ArchiverFactory;
 import jenkins.model.Jenkins;
+import org.apache.tools.ant.types.selectors.SelectorUtils;
 
 import javax.annotation.Nonnull;
 import java.io.*;
@@ -24,6 +26,18 @@ import java.util.logging.Logger;
 public class ShelveProjectExecutable
         implements Queue.Executable {
     private final static Logger LOGGER = Logger.getLogger(ShelveProjectExecutable.class.getName());
+    private static final String[] SYMLINK_EXCLUSION = new String[]{
+            SelectorUtils.DEEP_TREE_MATCH + "/lastFailedBuild/" + SelectorUtils.DEEP_TREE_MATCH,
+            SelectorUtils.DEEP_TREE_MATCH + "/lastSuccessfulBuild/" + SelectorUtils.DEEP_TREE_MATCH,
+            SelectorUtils.DEEP_TREE_MATCH + "/lastUnsuccessfulBuild/" + SelectorUtils.DEEP_TREE_MATCH,
+            SelectorUtils.DEEP_TREE_MATCH + "/lastStableBuild/" + SelectorUtils.DEEP_TREE_MATCH,
+            SelectorUtils.DEEP_TREE_MATCH + "/lastUnstableBuild/" + SelectorUtils.DEEP_TREE_MATCH,
+            SelectorUtils.DEEP_TREE_MATCH + "/lastFailed/" + SelectorUtils.DEEP_TREE_MATCH,
+            SelectorUtils.DEEP_TREE_MATCH + "/lastSuccessful/" + SelectorUtils.DEEP_TREE_MATCH,
+            SelectorUtils.DEEP_TREE_MATCH + "/lastUnsuccessful/" + SelectorUtils.DEEP_TREE_MATCH,
+            SelectorUtils.DEEP_TREE_MATCH + "/lastStable/" + SelectorUtils.DEEP_TREE_MATCH,
+            SelectorUtils.DEEP_TREE_MATCH + "/lastUnstable/" + SelectorUtils.DEEP_TREE_MATCH
+    };
 
     static final String METADATA_FILE_EXTENSION = "properties";
     static final String ARCHIVE_FILE_EXTENSION = "tar";
@@ -87,12 +101,16 @@ public class ShelveProjectExecutable
             // keeping the filename formatted as before, if external scripts depend on it they won't be broken
             Path archivePath = Files.createFile(shelvedProjectRoot.resolve(backupBaseName + "." + ARCHIVE_FILE_EXTENSION));
             FilePath destinationPath = new FilePath(archivePath.toFile());
-            tar(new FilePath(getJenkinsJobsDirectory()), destinationPath, String.join(",", regexp));
+            tar(new FilePath(getJenkinsJobsDirectory()), destinationPath, String.join(",", regexp), buildExclusionGlob());
             return true;
         } catch (IOException | InterruptedException e) {
             LOGGER.log(Level.SEVERE, "Could not archive project [" + item.getName() + "].", e);
             return false;
         }
+    }
+
+    private String buildExclusionGlob() {
+        return String.join(",", SYMLINK_EXCLUSION);
     }
 
     private void buildMetadataFile(Path shelvedProjectRoot, String backupBaseName, long archiveTime) throws IOException {
@@ -121,9 +139,9 @@ public class ShelveProjectExecutable
     }
 
     // could probably be integrated in FilePath
-    private static void tar(FilePath origin, FilePath dst, String glob) throws IOException, InterruptedException {
+    private static void tar(FilePath origin, FilePath dst, String includes, String excludes) throws IOException, InterruptedException {
         try (OutputStream os = dst.write()) {
-            origin.archive(ArchiverFactory.TARGZ, os, glob);
+            origin.archive(ArchiverFactory.TARGZ, os, new DirScanner.Glob(includes, excludes));
         }
     }
 
