@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -68,7 +69,7 @@ public class ShelvedProjectsAction implements RootAction {
             }
             PathMatcher legacyMatcher = FileSystems.getDefault().getPathMatcher("glob:**/*.zip");
             PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/*." + ARCHIVE_FILE_EXTENSION);
-            Files.walkFileTree(shelvedProjectRoot, new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(shelvedProjectRoot, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     super.visitFile(file, attrs);
