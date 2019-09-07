@@ -28,15 +28,16 @@ public class ShelveProjectTask implements Queue.FlyweightTask, Queue.TransientTa
   }
 
   public boolean isBuildBlocked() {
-    return false;
+    return item instanceof Queue.Task && ((Queue.Task) item).isBuildBlocked();
   }
 
+  @SuppressWarnings("deprecation")
   public String getWhyBlocked() {
-    return "";
+    return item instanceof Queue.Task ? ((Queue.Task) item).getWhyBlocked() : "";
   }
 
   public CauseOfBlockage getCauseOfBlockage() {
-    return null;
+    return item instanceof Queue.Task ? ((Queue.Task) item).getCauseOfBlockage() : null;
   }
 
   public String getName() {
