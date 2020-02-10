@@ -10,7 +10,7 @@
 
             Shelving a project will backup the project and then delete the project from Jenkins.
 
-            <div align="right">
+            <div>
                 <form method="post" action="shelveProject">
                     <input type="submit" value="Shelve Project" class="submit-button"/>
                 </form>
