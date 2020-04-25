@@ -1,0 +1,113 @@
+= Changelog
+
+== Newer versions
+See https://github.com/jenkinsci/shelve-project-plugin/releases[GitHub releases].
+
+== Version 2.4 (2019-03-28)
+
+* Add back public API methods and their documentation
+(https://issues.jenkins-ci.org/browse/JENKINS-56181[JENKINS-56181])
+* Allow users with Delete rights to shelve a project
+(https://issues.jenkins-ci.org/browse/JENKINS-55462[JENKINS-55462])
+
+== Version 2.3 (2019-03-10)
+
+* Fix an issue with shelving project not working without the (optional)
+Folder plugin
+(https://issues.jenkins-ci.org/browse/JENKINS-55331[JENKINS-55331])
+* Rework the shelve progress bar so that it doesn't link to the non
+existing _/console_ page
+(https://issues.jenkins-ci.org/browse/JENKINS-20922[JENKINS-20922])
+* Reintroduce compression on shelved folders
+(https://issues.jenkins-ci.org/browse/JENKINS-55244[JENKINS-55244])
+
+== Version 2.2 (2018-11-13)
+
+* Add Support for Pipeline Jobs
+(https://issues.jenkins-ci.org/browse/JENKINS-26432[JENKINS-26432])
+
+== Version 2.1 (2018-07-20)
+
+The way a project is backed up has now changed from zip to tar. This is
+mainly a detail of implementation for you as your currently shelved
+project can still be unshelved from zip files.
+
+However if you have some sort of automation on the shelved project
+directory (backup of the projects elsewhere for instance), you might
+need to adapt your script to look for tars instead of zips.
+
+* Take folders into account when shelving/unshelving
+(https://github.com/jenkinsci/shelve-project-plugin/commit/94e8e0193f81cf6f4ef4e8a1e2a6fef145bd74e5[JENKINS-43434]).
+* Do not use a JobProperty to add the shelve action
+(https://issues.jenkins-ci.org/browse/JENKINS-39929[JENKINS-39929]).
+* Failure to display the shelve icon on the job page should have
+disappeared.
+*  Symlinks are now correctly unshelved.
+
+== Version 2.0 (2018-07-15)
+
+* Switch development and tests to java 8.
+* Bump minimum Jenkins core to 2.60.3.
+* Various development third parties updates (JUnit...).
+* Jenkinsfile for automated build of the plugin in the Jenkins infra.
+* Fixed various issues detected by newly integrated tools (findbugs...).
+* https://jenkins.io/security/advisory/2018-07-30/#SECURITY-1001[Fix
+security issue]
+
+== Version 1.5 (2014-04-18)
+
+* Ability to delete shelved projects (
+https://issues.jenkins-ci.org/browse/JENKINS-11374[JENKINS-11374] )
+* Bug fix on updated config (
+https://issues.jenkins-ci.org/browse/JENKINS-10544[JENKINS-10544] )
+* Bug fix (
+https://issues.jenkins-ci.org/browse/JENKINS-8063[JENKINS-8063] )
+* Hygienic updates (rev JUnit, base plugin version, port to JenkinsRule
+for unit tests...)
+
+== Version 1.4.4 (2013-07-29)
+
+* Wipe out workspace while shelving project (this saves disk usage).
+(https://issues.jenkins-ci.org/browse/JENKINS-11023[issue #11023])
+
+== Version 1.3 (2011-08-06)
+
+* Sort list of shelves projects by the project name.
+(https://issues.jenkins-ci.org/browse/JENKINS-8570[JENKINS-8570])
+* Allow unshelving of multiple projects at the same time.
+(https://issues.jenkins-ci.org/browse/JENKINS-8571[JENKINS-8571])
+* Don't display full path for archive when unshelving.
+(https://issues.jenkins-ci.org/browse/JENKINS-8759[JENKINS-8759])
+
+== Version 1.2 (2011-02-08)
+
+* Update for Jenkins.
+
+== Version 1.1 (2010-11-05)
+
+* Update code making it compatible with Hudson 1.383. Older versions of
+Hudson received 500 errors because the method "getEstimatedDuration" was
+unimplemented.
+(https://issues.jenkins-ci.org/browse/JENKINS-8016[JENKINS-8016])
+
+== Version 1.0 (2010-10-18)
+
+* Change icon to a filing cabinet icon.
+(https://issues.jenkins-ci.org/browse/JENKINS-7817[JENKINS-7817])
+
+== Version 0.3 (2010-02-27)
+
+* Reload Hudson configuration after unshelving a project.
+(https://issues.jenkins-ci.org/browse/JENKINS-5425[JENKINS-5425])
+* Hudson version 1.336 or newer is now required for reloading Hudson's
+configuration after  unshelving a project.
+
+== Version 0.2 (2010-01-25)
+
+* Fix shelved projects link for views.
+(https://issues.jenkins-ci.org/browse/JENKINS-5339[JENKINS-5339])
+
+== Version 0.1 (2010-01-05)
+
+* Initial release
+
