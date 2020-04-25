@@ -9,6 +9,8 @@
             <h1>Shelve ${it.project.name}</h1>
 
             Shelving a project will backup the project and then delete the project from Jenkins.
+            <br/>
+            <b>When shelving a folder, make sure not to shelve one of its child projects at the same time to avoid discrepancies.</b>
 
             <div align="right">
                 <form method="post" action="shelveProject">
