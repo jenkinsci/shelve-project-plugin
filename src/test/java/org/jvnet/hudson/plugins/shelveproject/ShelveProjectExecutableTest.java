@@ -161,11 +161,12 @@ public class ShelveProjectExecutableTest {
     Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
 
     String archivePath = fileExplorerVisitor.getArchives()[0];
-    InputStream is = new FileInputStream(shelvedProjectsDir.toPath().resolve(archivePath).toFile());
-    byte[] fileAsBit = new byte[2];
-    is.read(fileAsBit);
-    assertEquals("Not the expected first byte for a gzip file", 0x1f, fileAsBit[0]);
-    assertEquals("Not the expected second byte for a gzip file", (byte) 0x8b, fileAsBit[1]);
+    try(InputStream is = new FileInputStream(shelvedProjectsDir.toPath().resolve(archivePath).toFile())) {
+      byte[] fileAsBit = new byte[2];
+      is.read(fileAsBit);
+      assertEquals("Not the expected first byte for a gzip file", 0x1f, fileAsBit[0]);
+      assertEquals("Not the expected second byte for a gzip file", (byte) 0x8b, fileAsBit[1]);
+    }
   }
 
   @Issue("JENKINS-55244")

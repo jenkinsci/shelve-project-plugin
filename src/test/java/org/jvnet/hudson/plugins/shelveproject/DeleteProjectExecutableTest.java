@@ -20,13 +20,13 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.*;
 
 public class DeleteProjectExecutableTest {
-    private Task parentTask;
 
     @Rule
     public JenkinsRule jenkinsRule = new JenkinsRule();
@@ -51,20 +51,23 @@ public class DeleteProjectExecutableTest {
         File shelvedProjectsDir = new File(Jenkins.getInstance().getRootDir(), "shelvedProjects");
         shelvedProjectsDir.mkdirs();
 
-        ShelveProjectExecutable a = new ShelveProjectExecutable(parentTask, project);
+        ShelveProjectExecutable a = new ShelveProjectExecutable(null, project);
         a.run();
 
-        assertEquals("Directory should contain two archives, the metadata and the archive", 2, Files.list(shelvedProjectsDir.toPath()).count());
+        try(Stream<Path> files= Files.list(shelvedProjectsDir.toPath())) {
+            assertEquals("Directory should contain two archives, the metadata and the archive", 2, files.count());
+        }
+         FileExplorerVisitor fileExplorerVisitor = new FileExplorerVisitor();
+         Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
+         assertEquals("Not the expected number of archive archives", 1, fileExplorerVisitor.getArchiveFileCount());
+         assertEquals("Not the expected number of metadata archives", 1, fileExplorerVisitor.getMetadataFileCount());
 
-        FileExplorerVisitor fileExplorerVisitor = new FileExplorerVisitor();
-        Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
-        assertEquals("Not the expected number of archive archives", 1, fileExplorerVisitor.getArchiveFileCount());
-        assertEquals("Not the expected number of metadata archives", 1, fileExplorerVisitor.getMetadataFileCount());
+         DeleteProjectExecutable deleteProjectExecutable = new DeleteProjectExecutable(null, fileExplorerVisitor.getArchives());
+         deleteProjectExecutable.run();
 
-        DeleteProjectExecutable deleteProjectExecutable = new DeleteProjectExecutable(parentTask, fileExplorerVisitor.getArchives());
-        deleteProjectExecutable.run();
-
-        assertEquals("Directory should not contain anything", 0, Files.list(shelvedProjectsDir.toPath()).count());
+        try(Stream<Path> files= Files.list(shelvedProjectsDir.toPath())) {
+            assertEquals("Directory should not contain anything", 0, files.count());
+        }
     }
 
     static class FileExplorerVisitor extends SimpleFileVisitor<Path> {
@@ -137,10 +140,10 @@ public class DeleteProjectExecutableTest {
         shelvedProjectsDir.mkdirs();
 
         //Shelve project to be deleted later on
-        ShelveProjectExecutable shelveProjectExecutable = new ShelveProjectExecutable(parentTask, projectToDelete);
+        ShelveProjectExecutable shelveProjectExecutable = new ShelveProjectExecutable(null, projectToDelete);
         shelveProjectExecutable.run();
         //Shelve project to be unshelved later on
-        shelveProjectExecutable = new ShelveProjectExecutable(parentTask, projectToUnshelve);
+        shelveProjectExecutable = new ShelveProjectExecutable(null, projectToUnshelve);
         shelveProjectExecutable.run();
 
         FileExplorerVisitor fileExplorerVisitor = new FileExplorerVisitor();
@@ -152,13 +155,14 @@ public class DeleteProjectExecutableTest {
 
         String[] archives = fileExplorerVisitor.getArchives();
 
-        UnshelveProjectExecutable unShelveProjectExecutable = new UnshelveProjectExecutable(parentTask, new String[]{archives[0]});
-        DeleteProjectExecutable deleteProjectExecutable = new DeleteProjectExecutable(parentTask, new String[]{archives[1]});
+        UnshelveProjectExecutable unShelveProjectExecutable = new UnshelveProjectExecutable(null, new String[]{archives[0]});
+        DeleteProjectExecutable deleteProjectExecutable = new DeleteProjectExecutable(null, new String[]{archives[1]});
 
         unShelveProjectExecutable.run();
         deleteProjectExecutable.run();
 
-        assertEquals("Directory should not contain anything", 0, Files.list(shelvedProjectsDir.toPath()).count());
-
+        try(Stream<Path> files= Files.list(shelvedProjectsDir.toPath())) {
+            assertEquals("Directory should not contain anything", 0, files.count());
+        }
     }
 }
