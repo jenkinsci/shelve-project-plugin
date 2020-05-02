@@ -10,7 +10,7 @@
 
   <artifactId>shelve-project-plugin</artifactId>
   <name>Shelve Project Plugin</name>
-  <version>3.0-SNAPSHOT</version>
+  <version>3.0</version>
   <packaging>hpi</packaging>
   <url>https://github.com/jenkinsci/shelve-project-plugin</url>
 
@@ -91,7 +91,7 @@
     <connection>scm:git:git://github.com/jenkinsci/shelve-project-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/shelve-project-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/shelve-project-plugin</url>
-    <tag>HEAD</tag>
+    <tag>shelve-project-plugin-3.0</tag>
   </scm>
 
   <repositories>
