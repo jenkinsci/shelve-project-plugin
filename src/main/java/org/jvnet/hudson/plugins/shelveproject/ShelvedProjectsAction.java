@@ -11,6 +11,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
+import org.kohsuke.stapler.verb.POST;
 
 import javax.servlet.ServletException;
 import java.io.File;
@@ -114,6 +115,7 @@ public class ShelvedProjectsAction implements RootAction {
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
+    @POST
     public HttpResponse doManageShelvedProject(StaplerRequest request,
                                                StaplerResponse response)
             throws IOException, ServletException {

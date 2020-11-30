@@ -6,6 +6,7 @@ import hudson.security.Permission;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
+import org.kohsuke.stapler.verb.POST;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -50,6 +51,7 @@ public class ShelveProjectAction implements Action {
   }
 
   @SuppressWarnings({"UnusedDeclaration"})
+  @POST
   public HttpResponse doShelveProject()
           throws IOException, ServletException {
     Jenkins.getInstance().checkPermission(Item.DELETE);
