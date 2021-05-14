@@ -30,11 +30,13 @@ image:docs/images/unshelve-project-action.png[image,width=400]
 
 image:docs/images/unshelve-project-ui.png[image,width=800]
 
+IMPORTANT: In order to unshelve, the user needs the *ADMINISTER* permission.
+
 [[ShelveProjectPlugin-Security]]
 == Security
 
 Shelving a project requires the *DELETE* permission.
-Unshelving a project requires the *CREATE* permission.
+Unshelving a project requires the *ADMINISTER* permission.
 
 == Changelog
 ifdef::env-github,env-browser[:outfilesuffix: .adoc]
