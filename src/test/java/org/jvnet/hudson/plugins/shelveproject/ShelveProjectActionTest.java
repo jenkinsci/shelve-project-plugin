@@ -37,7 +37,7 @@ public class ShelveProjectActionTest {
                 grant(Jenkins.READ).onItems(project).to("reader"));
     }
 
-    @Issue({"JENKINS-55462", "JENKINS-66382"})
+    @Issue("JENKINS-55462")
     @Test
     public void testShelveIconShouldBeVisibleForAdmin() {
         ACL.as(User.get("admin"));
