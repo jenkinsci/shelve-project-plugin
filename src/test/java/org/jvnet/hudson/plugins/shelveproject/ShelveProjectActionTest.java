@@ -51,7 +51,7 @@ public class ShelveProjectActionTest {
         assertNotNull("Shelve icon should be visible", new ShelveProjectAction(project).getIconFileName());
     }
 
-    @Issue({"JENKINS-55462", "JENKINS-66382"})
+    @Issue("JENKINS-55462")
     @Test
     public void testShelveIconShouldNotBeVisibleForOtherUsers() {
         ACL.as(User.get("creator"));
