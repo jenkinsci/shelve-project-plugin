@@ -30,8 +30,8 @@ public class ShelveProjectAction implements Action {
     return getShelveIconPath(getItem());
   }
 
-  private static String getShelveIconPath(Item item) {
-    return (item != null) ? item.hasPermission(SHELVE_PERMISSION) ? ACTION_ICON_PATH : null : null;
+  private String getShelveIconPath(Item item) {
+    return item != null && item.hasPermission(SHELVE_PERMISSION) ? ACTION_ICON_PATH : null;
   }
 
   public String getDisplayName() {
@@ -54,7 +54,12 @@ public class ShelveProjectAction implements Action {
   @POST
   public HttpResponse doShelveProject()
           throws IOException, ServletException {
-    getItem().checkPermission(Item.DELETE);
+    if (getItem() != null) {
+      getItem().checkPermission(Item.DELETE);
+    } else{
+      throw new ServletException();
+    }
+
     if (!isShelvingProject()) {
       LOGGER.info("Shelving project [" + getItem().getName() + "].");
       // Shelving the project could take some time, so add it as a task

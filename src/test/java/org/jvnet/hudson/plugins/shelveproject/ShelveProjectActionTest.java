@@ -1,6 +1,5 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
-import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.model.User;
 import hudson.security.ACL;
@@ -24,7 +23,7 @@ import static org.junit.Assert.assertNull;
 public class ShelveProjectActionTest {
     @Rule
     public JenkinsRule jenkinsRule = new JenkinsRule();
-    private FreeStyleProject project = null;
+    private Item project;
 
     @Before
     public void setUp() throws IOException{
