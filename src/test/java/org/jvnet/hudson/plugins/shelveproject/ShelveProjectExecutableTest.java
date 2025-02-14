@@ -35,7 +35,7 @@ import org.jvnet.hudson.test.MockFolder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.ARCHIVE_COMPRESSION;
-import static org.jvnet.hudson.plugins.shelveproject.ShelvedProjectsAction.*;
+import static org.jvnet.hudson.plugins.shelveproject.ShelvedProjectsAction.SHELVED_PROJECTS_DIRECTORY;
 
 /**
  * @author ben.patterson

@@ -3,7 +3,6 @@ package org.jvnet.hudson.plugins.shelveproject;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.model.Queue.Task;
 import hudson.tasks.Shell;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.FilenameUtils;
@@ -24,7 +23,8 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.*;
+import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.ARCHIVE_FILE_EXTENSION;
+import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.METADATA_FILE_EXTENSION;
 
 public class DeleteProjectExecutableTest {
 
