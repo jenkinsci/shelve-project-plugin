@@ -123,7 +123,7 @@ public class ShelvedProjectsActionTest {
     }
 
     @Issue("JENKINS-55462")
-    @Test(expected = hudson.security.AccessDeniedException2.class)
+    @Test(expected = hudson.security.AccessDeniedException3.class)
     public void testGetShelvedProjectsWithNoAdminRightsShouldThrow() throws IOException {
         ACL.as(User.get("reader"));
         FileUtils.touch(new File(shelvedProjectsDir, "one-project.zip"));
@@ -131,7 +131,7 @@ public class ShelvedProjectsActionTest {
     }
 
     @Issue("JENKINS-55462")
-    @Test(expected = hudson.security.AccessDeniedException2.class)
+    @Test(expected = hudson.security.AccessDeniedException3.class)
     public void testGetShelvedProjectsWithOnlyCreateRightsShouldThrow() throws IOException {
         ACL.as(User.get("creator"));
         FileUtils.touch(new File(shelvedProjectsDir, "one-project.zip"));
