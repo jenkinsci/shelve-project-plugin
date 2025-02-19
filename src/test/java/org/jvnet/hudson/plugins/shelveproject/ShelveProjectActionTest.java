@@ -3,27 +3,29 @@ package org.jvnet.hudson.plugins.shelveproject;
 import hudson.model.Item;
 import hudson.model.User;
 import hudson.security.ACL;
+import hudson.security.ACLContext;
 import jenkins.model.Jenkins;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import java.util.HashMap;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Created by Pierre Beitz
  * on 2019-03-10.
  */
-public class ShelveProjectActionTest {
-    @Rule
-    public JenkinsRule jenkinsRule = new JenkinsRule();
+@WithJenkins
+class ShelveProjectActionTest {
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp(JenkinsRule jenkinsRule) {
         jenkinsRule.jenkins.setSecurityRealm(jenkinsRule.createDummySecurityRealm());
         jenkinsRule.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy().
                 grant(Jenkins.ADMINISTER).everywhere().to("admin").
@@ -34,24 +36,28 @@ public class ShelveProjectActionTest {
 
     @Issue("JENKINS-55462")
     @Test
-    public void testShelveIconShouldBeVisibleForAdmin() {
-        ACL.as(User.get("admin"));
-        assertNotNull("Shelve icon should be visible", new ShelveProjectAction(null).getIconFileName());
+    void testShelveIconShouldBeVisibleForAdmin() {
+        try (ACLContext ignored = ACL.as2(User.get("admin", true, new HashMap<>()).impersonate2())) {
+            assertNotNull(new ShelveProjectAction(null).getIconFileName(), "Shelve icon should be visible");
+        }
     }
 
     @Issue("JENKINS-55462")
     @Test
-    public void testShelveIconShouldBeVisibleForUserWithDeleteRights() {
-        ACL.as(User.get("developer"));
-        assertNotNull("Shelve icon should be visible", new ShelveProjectAction(null).getIconFileName());
+    void testShelveIconShouldBeVisibleForUserWithDeleteRights() {
+        try (ACLContext ignored = ACL.as2(User.get("developer", true, new HashMap<>()).impersonate2())) {
+            assertNotNull(new ShelveProjectAction(null).getIconFileName(), "Shelve icon should be visible");
+        }
     }
 
     @Issue("JENKINS-55462")
     @Test
-    public void testShelveIconShouldNotBeVisibleForOtherUsers() {
-        ACL.as(User.get("creator"));
-        assertNull("Shelve icon should not be visible", new ShelveProjectAction(null).getIconFileName());
-        ACL.as(User.get("reader"));
-        assertNull("Shelve icon should not be visible", new ShelveProjectAction(null).getIconFileName());
+    void testShelveIconShouldNotBeVisibleForOtherUsers() {
+        try (ACLContext ignored = ACL.as2(User.get("creator", true, new HashMap<>()).impersonate2())) {
+            assertNull(new ShelveProjectAction(null).getIconFileName(), "Shelve icon should not be visible");
+        }
+        try (ACLContext ignored = ACL.as2(User.get("reader", true, new HashMap<>()).impersonate2())) {
+            assertNull(new ShelveProjectAction(null).getIconFileName(), "Shelve icon should not be visible");
+        }
     }
 }

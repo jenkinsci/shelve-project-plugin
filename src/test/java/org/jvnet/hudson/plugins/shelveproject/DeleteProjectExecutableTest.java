@@ -1,4 +1,3 @@
-
 package org.jvnet.hudson.plugins.shelveproject;
 
 import hudson.model.FreeStyleBuild;
@@ -6,9 +5,9 @@ import hudson.model.FreeStyleProject;
 import hudson.tasks.Shell;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.FilenameUtils;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,15 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.ARCHIVE_FILE_EXTENSION;
 import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.METADATA_FILE_EXTENSION;
 
-public class DeleteProjectExecutableTest {
-
-    @Rule
-    public JenkinsRule jenkinsRule = new JenkinsRule();
+@WithJenkins
+class DeleteProjectExecutableTest {
 
     /**
      * Tests if a project is deleted.
@@ -37,7 +34,7 @@ public class DeleteProjectExecutableTest {
      * @throws Exception
      */
     @Test
-    public void testProjectTarIsDeleted() throws Exception {
+    void testProjectTarIsDeleted(JenkinsRule jenkinsRule) throws Exception {
 
         String projectname = "ProjectWithWorkspace";
 
@@ -46,27 +43,27 @@ public class DeleteProjectExecutableTest {
 
         FreeStyleBuild b = project.scheduleBuild2(0).get();
 
-        assertTrue("Workspace should exist by now", b.getWorkspace().exists());
+        assertTrue(b.getWorkspace().exists(), "Workspace should exist by now");
 
-        File shelvedProjectsDir = new File(Jenkins.getInstance().getRootDir(), "shelvedProjects");
+        File shelvedProjectsDir = new File(Jenkins.get().getRootDir(), "shelvedProjects");
         shelvedProjectsDir.mkdirs();
 
         ShelveProjectExecutable a = new ShelveProjectExecutable(null, project);
         a.run();
 
-        try(Stream<Path> files= Files.list(shelvedProjectsDir.toPath())) {
-            assertEquals("Directory should contain two archives, the metadata and the archive", 2, files.count());
+        try (Stream<Path> files = Files.list(shelvedProjectsDir.toPath())) {
+            assertEquals(2, files.count(), "Directory should contain two archives, the metadata and the archive");
         }
-         FileExplorerVisitor fileExplorerVisitor = new FileExplorerVisitor();
-         Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
-         assertEquals("Not the expected number of archive archives", 1, fileExplorerVisitor.getArchiveFileCount());
-         assertEquals("Not the expected number of metadata archives", 1, fileExplorerVisitor.getMetadataFileCount());
+        FileExplorerVisitor fileExplorerVisitor = new FileExplorerVisitor();
+        Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
+        assertEquals(1, fileExplorerVisitor.getArchiveFileCount(), "Not the expected number of archive archives");
+        assertEquals(1, fileExplorerVisitor.getMetadataFileCount(), "Not the expected number of metadata archives");
 
-         DeleteProjectExecutable deleteProjectExecutable = new DeleteProjectExecutable(null, fileExplorerVisitor.getArchives());
-         deleteProjectExecutable.run();
+        DeleteProjectExecutable deleteProjectExecutable = new DeleteProjectExecutable(null, fileExplorerVisitor.getArchives());
+        deleteProjectExecutable.run();
 
-        try(Stream<Path> files= Files.list(shelvedProjectsDir.toPath())) {
-            assertEquals("Directory should not contain anything", 0, files.count());
+        try (Stream<Path> files = Files.list(shelvedProjectsDir.toPath())) {
+            assertEquals(0, files.count(), "Directory should not contain anything");
         }
     }
 
@@ -119,7 +116,7 @@ public class DeleteProjectExecutableTest {
      * @throws Exception
      */
     @Test
-    public void testParallelProjectUnshelvingAndDeleting() throws Exception {
+    void testParallelProjectUnshelvingAndDeleting(JenkinsRule jenkinsRule) throws Exception {
 
         String projectnameToUnshelve = "ProjectToUnshelveWithWorkspace";
         String projectnameToDelete = "ProjectToDeleteWithWorkspace";
@@ -128,15 +125,15 @@ public class DeleteProjectExecutableTest {
         FreeStyleProject projectToUnshelve = jenkinsRule.createFreeStyleProject(projectnameToUnshelve);
         projectToUnshelve.getBuildersList().add(new Shell("echo hello"));
         FreeStyleBuild unshelveBuild = projectToUnshelve.scheduleBuild2(0).get();
-        assertTrue("Workspace should exist by now", unshelveBuild.getWorkspace().exists());
+        assertTrue(unshelveBuild.getWorkspace().exists(), "Workspace should exist by now");
 
         //Project to delete
         FreeStyleProject projectToDelete = jenkinsRule.createFreeStyleProject(projectnameToDelete);
         projectToDelete.getBuildersList().add(new Shell("echo hello"));
         FreeStyleBuild deleteBuild = projectToDelete.scheduleBuild2(0).get();
-        assertTrue("Workspace should exist by now", deleteBuild.getWorkspace().exists());
+        assertTrue(deleteBuild.getWorkspace().exists(), "Workspace should exist by now");
 
-        File shelvedProjectsDir = new File(Jenkins.getInstance().getRootDir(), "shelvedProjects");
+        File shelvedProjectsDir = new File(Jenkins.get().getRootDir(), "shelvedProjects");
         shelvedProjectsDir.mkdirs();
 
         //Shelve project to be deleted later on
@@ -149,9 +146,9 @@ public class DeleteProjectExecutableTest {
         FileExplorerVisitor fileExplorerVisitor = new FileExplorerVisitor();
         Files.walkFileTree(shelvedProjectsDir.toPath(), fileExplorerVisitor);
 
-        assertEquals("Not the expected number of archive archives", 2, fileExplorerVisitor.getArchiveFileCount());
-        assertEquals("Not the expected number of metadata archives", 2, fileExplorerVisitor.getMetadataFileCount());
-        assertEquals("There should be no unexpected files", 0, fileExplorerVisitor.getUnexpectedFileCount());
+        assertEquals(2, fileExplorerVisitor.getArchiveFileCount(), "Not the expected number of archive archives");
+        assertEquals(2, fileExplorerVisitor.getMetadataFileCount(), "Not the expected number of metadata archives");
+        assertEquals(0, fileExplorerVisitor.getUnexpectedFileCount(), "There should be no unexpected files");
 
         String[] archives = fileExplorerVisitor.getArchives();
 
@@ -161,8 +158,8 @@ public class DeleteProjectExecutableTest {
         unShelveProjectExecutable.run();
         deleteProjectExecutable.run();
 
-        try(Stream<Path> files= Files.list(shelvedProjectsDir.toPath())) {
-            assertEquals("Directory should not contain anything", 0, files.count());
+        try (Stream<Path> files = Files.list(shelvedProjectsDir.toPath())) {
+            assertEquals(0, files.count(), "Directory should not contain anything");
         }
     }
 }
