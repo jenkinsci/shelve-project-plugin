@@ -15,7 +15,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.*;
-import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.PROJECT_PATH_PROPERTY;
 
 /**
  * A {@link Queue.Executable} that will take care of unshelving projects.
