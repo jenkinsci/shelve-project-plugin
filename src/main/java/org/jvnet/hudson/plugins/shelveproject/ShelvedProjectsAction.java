@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.*;
+import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.ARCHIVE_FILE_EXTENSION;
 
 @ExportedBean(defaultVisibility = 999)
 @Extension

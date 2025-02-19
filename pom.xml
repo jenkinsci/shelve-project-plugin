@@ -4,54 +4,31 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.18</version>
+    <version>4.51</version>
     <relativePath />
   </parent>
 
   <artifactId>shelve-project-plugin</artifactId>
   <name>Shelve Project Plugin</name>
-  <version>3.3-SNAPSHOT</version>
+  <version>${revision}${changelist}</version>
   <packaging>hpi</packaging>
   <url>https://github.com/jenkinsci/shelve-project-plugin</url>
 
   <properties>
-    <jenkins.version>2.263.1</jenkins.version>
-    <java.level>8</java.level>
+    <revision>3.3</revision>
+    <changelist>-SNAPSHOT</changelist>
+    <gitHubRepo>jenkinsci/shelve-project-plugin</gitHubRepo>
+    <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
+    <jenkins.baseline>2.346</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.3</jenkins.version>
     <slf4jVersion>1.7.30</slf4jVersion>
   </properties>
-
-  <developers>
-    <developer>
-      <id>bpatterson</id>
-      <name>Ben Patterson</name>
-      <email>patterson.ben@gmail.com</email>
-      <roles>
-        <role>Maintainer (retired)</role>
-      </roles>
-    </developer>
-  <developer>
-      <id>ashlux</id>
-      <name>Ash Lux</name>
-      <email>ashlux@gmail.com</email>
-      <roles>
-        <role>Maintainer (retired)</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>pierrebtz</id>
-      <name>Pierre Beitz</name>
-      <email>pibeitz@gmail.com</email>
-      <roles>
-        <role>Maintainer</role>
-      </roles>
-    </developer>
-  </developers>
 
   <dependencies>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
-      <version>1.8.1</version>
+      <version>1.10.19</version>
       <scope>test</scope>
     </dependency>
 
@@ -77,8 +54,8 @@
     <dependencies>
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.263.x</artifactId>
-        <version>807.v6d348e44c987</version>
+        <artifactId>bom-${jenkins.baseline}.x</artifactId>
+        <version>1763.v092b_8980a_f5e</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -87,10 +64,10 @@
 
 
   <scm>
-    <connection>scm:git:git://github.com/jenkinsci/shelve-project-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/shelve-project-plugin.git</developerConnection>
-    <url>https://github.com/jenkinsci/shelve-project-plugin</url>
-    <tag>HEAD</tag>
+    <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
+    <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
+    <url>https://github.com/${gitHubRepo}</url>
+    <tag>${scmTag}</tag>
   </scm>
 
   <repositories>

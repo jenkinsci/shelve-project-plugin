@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
-import static org.apache.commons.io.FileUtils.*;
+import static org.apache.commons.io.FileUtils.touch;
 import static org.junit.Assert.assertEquals;
 
 /**
