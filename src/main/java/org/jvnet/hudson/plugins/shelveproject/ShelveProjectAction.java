@@ -30,8 +30,8 @@ public class ShelveProjectAction implements Action {
     return getShelveIconPath();
   }
 
-  private static String getShelveIconPath() {
-    return Jenkins.getInstance().hasPermission(SHELVE_PERMISSION) ? ACTION_ICON_PATH : null;
+  private String getShelveIconPath() {
+    return item.hasPermission(SHELVE_PERMISSION) ? ACTION_ICON_PATH : null;
   }
 
   public String getDisplayName() {
@@ -54,7 +54,7 @@ public class ShelveProjectAction implements Action {
   @POST
   public HttpResponse doShelveProject()
           throws IOException, ServletException {
-    Jenkins.getInstance().checkPermission(Item.DELETE);
+    item.checkPermission(Item.DELETE);
     if (!isShelvingProject()) {
       LOGGER.info("Shelving project [" + getItem().getName() + "].");
       // Shelving the project could take some time, so add it as a task
