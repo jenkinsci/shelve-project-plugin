@@ -7,13 +7,13 @@ import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 import org.kohsuke.stapler.verb.POST;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -116,8 +116,8 @@ public class ShelvedProjectsAction implements RootAction {
 
     @SuppressWarnings({"UnusedDeclaration"})
     @POST
-    public HttpResponse doManageShelvedProject(StaplerRequest request,
-                                               StaplerResponse response)
+    public HttpResponse doManageShelvedProject(StaplerRequest2 request,
+                                               StaplerResponse2 response)
             throws IOException, ServletException {
         if (request.hasParameter("unshelve"))
             return unshelveProject(request);
@@ -126,7 +126,7 @@ public class ShelvedProjectsAction implements RootAction {
         return createRedirectToShelvedProjectsPage();
     }
 
-    private HttpResponse unshelveProject(StaplerRequest request) {
+    private HttpResponse unshelveProject(StaplerRequest2 request) {
         Jenkins.getInstance().checkPermission(UNSHELVE_PERMISSION);
 
         final String[] archives = request.getParameterValues("archives");
@@ -141,7 +141,7 @@ public class ShelvedProjectsAction implements RootAction {
         return createRedirectToMainPage();
     }
 
-    private HttpResponse deleteProject(StaplerRequest request) {
+    private HttpResponse deleteProject(StaplerRequest2 request) {
         Jenkins.getInstance().checkPermission(UNSHELVE_PERMISSION);
 
         final String[] archives = request.getParameterValues("archives");
