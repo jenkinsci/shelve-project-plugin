@@ -1,5 +1,6 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
+import hudson.model.AbstractItem;
 import hudson.model.Action;
 import hudson.model.Item;
 import hudson.security.Permission;
@@ -8,8 +9,6 @@ import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.verb.POST;
 
-import jakarta.servlet.ServletException;
-import java.io.IOException;
 import java.util.logging.Logger;
 
 public class ShelveProjectAction implements Action {
@@ -18,7 +17,6 @@ public class ShelveProjectAction implements Action {
   private Item item;
 
   private boolean isShelvingProject;
-  private static final String ACTION_ICON_PATH = "/plugin/shelve-project-plugin/icons/shelve-project-icon.png";
 
   public ShelveProjectAction(Item item) {
     this.item = item;
@@ -31,11 +29,14 @@ public class ShelveProjectAction implements Action {
   }
 
   private static String getShelveIconPath() {
-    return Jenkins.getInstance().hasPermission(SHELVE_PERMISSION) ? ACTION_ICON_PATH : null;
+    return Jenkins.get().hasPermission(SHELVE_PERMISSION) ? "symbol-file-tray-stacked-outline plugin-ionicons-api" : null;
   }
 
   public String getDisplayName() {
-    return "Shelve Project";
+    if (item instanceof AbstractItem a) {
+      return "Shelve " + a.getPronoun();
+    }
+    return "Shelve Item";
   }
 
   public String getUrlName() {
@@ -52,19 +53,18 @@ public class ShelveProjectAction implements Action {
 
   @SuppressWarnings({"UnusedDeclaration"})
   @POST
-  public HttpResponse doShelveProject()
-          throws IOException, ServletException {
-    Jenkins.getInstance().checkPermission(Item.DELETE);
+  public HttpResponse doShelveProject() {
+    Jenkins.get().checkPermission(Item.DELETE);
     if (!isShelvingProject()) {
-      LOGGER.info("Shelving project [" + getItem().getName() + "].");
+      LOGGER.info("Shelving project [" + getItem().getFullName() + "].");
       // Shelving the project could take some time, so add it as a task
-      Jenkins.getInstance().getQueue().schedule(new ShelveProjectTask(item), 0);
+      Jenkins.get().getQueue().schedule(new ShelveProjectTask(item), 0);
     }
 
     return createRedirectToMainPage();
   }
 
   private HttpRedirect createRedirectToMainPage() {
-    return new HttpRedirect(Jenkins.getInstance().getRootUrl());
+    return new HttpRedirect(Jenkins.get().getRootUrl());
   }
 }

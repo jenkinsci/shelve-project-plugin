@@ -13,15 +13,12 @@ import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 import org.kohsuke.stapler.verb.POST;
 
-import jakarta.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.Collator;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.LinkedList;
@@ -36,7 +33,6 @@ import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.ARC
 public class ShelvedProjectsAction implements RootAction {
     private final static Logger LOGGER = Logger.getLogger(ShelvedProjectsAction.class.getName());
     static final String SHELVED_PROJECTS_DIRECTORY = "shelvedProjects";
-    private static final String ACTION_ICON_PATH = "/plugin/shelve-project-plugin/icons/shelve-project-icon.png";
     private static final Permission UNSHELVE_PERMISSION = Jenkins.ADMINISTER;
 
     @Override
@@ -45,9 +41,9 @@ public class ShelvedProjectsAction implements RootAction {
     }
 
     private static String getUnshelveIconPath() {
-        // keeping as the existing, ie you need the administrative priviledge to unshelve
+        // keeping as the existing, ie you need the administrative privilege to unshelve
         // otherwise you could leak projects (see documentation and JENKINS-55462).
-        return Jenkins.getInstance().hasPermission(UNSHELVE_PERMISSION) ? ACTION_ICON_PATH : null;
+        return Jenkins.get().hasPermission(UNSHELVE_PERMISSION) ? "symbol-file-tray-stacked-outline plugin-ionicons-api" : null;
     }
 
     public String getDisplayName() {
@@ -60,8 +56,8 @@ public class ShelvedProjectsAction implements RootAction {
 
     @Exported
     public List<ShelvedProject> getShelvedProjects() {
-        Jenkins.getInstance().checkPermission(UNSHELVE_PERMISSION);
-        Path rootPath = Jenkins.getInstance().getRootDir().toPath();
+        Jenkins.get().checkPermission(UNSHELVE_PERMISSION);
+        Path rootPath = Jenkins.get().getRootDir().toPath();
         List<ShelvedProject> projects = new LinkedList<>();
         try {
             Path shelvedProjectRoot = rootPath.resolve(ShelvedProjectsAction.SHELVED_PROJECTS_DIRECTORY);
@@ -70,7 +66,7 @@ public class ShelvedProjectsAction implements RootAction {
             }
             PathMatcher legacyMatcher = FileSystems.getDefault().getPathMatcher("glob:**/*.zip");
             PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/*." + ARCHIVE_FILE_EXTENSION);
-            Files.walkFileTree(shelvedProjectRoot, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(shelvedProjectRoot, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     super.visitFile(file, attrs);
@@ -93,11 +89,7 @@ public class ShelvedProjectsAction implements RootAction {
     private void sortProjectsAlphabetically(final List<ShelvedProject> projects) {
         final Collator collator = Collator.getInstance();
 
-        Collections.sort(projects, new Comparator<ShelvedProject>() {
-            public int compare(ShelvedProject project1, ShelvedProject project2) {
-                return collator.compare(project1.getProjectName(), project2.getProjectName());
-            }
-        });
+        projects.sort((project1, project2) -> collator.compare(project1.getProjectName(), project2.getProjectName()));
     }
 
     private ShelvedProject getShelvedProjectFromArchive(File archive) {
@@ -117,8 +109,7 @@ public class ShelvedProjectsAction implements RootAction {
     @SuppressWarnings({"UnusedDeclaration"})
     @POST
     public HttpResponse doManageShelvedProject(StaplerRequest2 request,
-                                               StaplerResponse2 response)
-            throws IOException, ServletException {
+                                               StaplerResponse2 response) {
         if (request.hasParameter("unshelve"))
             return unshelveProject(request);
         else if (request.hasParameter("delete"))
@@ -127,7 +118,7 @@ public class ShelvedProjectsAction implements RootAction {
     }
 
     private HttpResponse unshelveProject(StaplerRequest2 request) {
-        Jenkins.getInstance().checkPermission(UNSHELVE_PERMISSION);
+        Jenkins.get().checkPermission(UNSHELVE_PERMISSION);
 
         final String[] archives = request.getParameterValues("archives");
         if (archives == null) {
@@ -136,13 +127,13 @@ public class ShelvedProjectsAction implements RootAction {
 
         LOGGER.info("Unshelving archived projects.");
         // Unshelving the project could take some time, so add it as a task
-        Jenkins.getInstance().getQueue().schedule(new UnshelveProjectTask(archives), 0);
+        Jenkins.get().getQueue().schedule(new UnshelveProjectTask(archives), 0);
 
         return createRedirectToMainPage();
     }
 
     private HttpResponse deleteProject(StaplerRequest2 request) {
-        Jenkins.getInstance().checkPermission(UNSHELVE_PERMISSION);
+        Jenkins.get().checkPermission(UNSHELVE_PERMISSION);
 
         final String[] archives = request.getParameterValues("archives");
         if (archives == null) {
@@ -151,7 +142,7 @@ public class ShelvedProjectsAction implements RootAction {
 
         LOGGER.info("Deleting archived projects.");
         // Deleting the project could take some time, so add it as a task
-        Jenkins.getInstance().getQueue().schedule(new DeleteProjectTask(archives), 0);
+        Jenkins.get().getQueue().schedule(new DeleteProjectTask(archives), 0);
 
         return createRedirectToShelvedProjectsPage();
     }
@@ -163,10 +154,10 @@ public class ShelvedProjectsAction implements RootAction {
     }
 
     private HttpResponse createRedirectToShelvedProjectsPage() {
-        return new HttpRedirect(Jenkins.getInstance().getRootUrl() + this.getUrlName());
+        return new HttpRedirect(Jenkins.get().getRootUrl() + this.getUrlName());
     }
 
     private HttpRedirect createRedirectToMainPage() {
-        return new HttpRedirect(Jenkins.getInstance().getRootUrl());
+        return new HttpRedirect(Jenkins.get().getRootUrl());
     }
 }

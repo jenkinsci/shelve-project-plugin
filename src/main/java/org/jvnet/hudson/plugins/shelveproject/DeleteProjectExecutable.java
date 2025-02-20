@@ -1,5 +1,6 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.Queue;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.FileUtils;
@@ -40,6 +41,7 @@ public class DeleteProjectExecutable implements Queue.Executable {
                 Arrays.copyOf(shelvedProjectArchiveNames, shelvedProjectArchiveNames.length) : null;
     }
 
+    @NonNull
     public Queue.Task getParent() {
         return parentTask;
     }
@@ -61,8 +63,8 @@ public class DeleteProjectExecutable implements Queue.Executable {
 
     static File getArchiveFile(String shelvedProjectArchiveName) {
         // JENKINS-8759 - The archive name comes from the html form, so take a bit extra care for security reasons by
-        // only accessing the archive if it exists in the directory of shevled projects.
-        File shelvedProjectsDirectory = new File(Jenkins.getInstance().getRootDir(), ShelvedProjectsAction.SHELVED_PROJECTS_DIRECTORY);
+        // only accessing the archive if it exists in the directory of shelved projects.
+        File shelvedProjectsDirectory = new File(Jenkins.get().getRootDir(), ShelvedProjectsAction.SHELVED_PROJECTS_DIRECTORY);
         Collection<File> files = FileUtils.listFiles(shelvedProjectsDirectory, null, false);
         for (File file : files) {
             if (StringUtils.equals(file.getName(), shelvedProjectArchiveName)) {

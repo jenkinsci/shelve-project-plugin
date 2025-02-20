@@ -1,5 +1,6 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import hudson.model.Queue;
 import jenkins.model.Jenkins;
@@ -40,6 +41,7 @@ public class UnshelveProjectExecutable implements Queue.Executable {
             Arrays.copyOf(shelvedProjectArchiveNames, shelvedProjectArchiveNames.length) : null;
   }
 
+  @NonNull
   public Queue.Task getParent() {
     return parentTask;
   }
@@ -64,7 +66,7 @@ public class UnshelveProjectExecutable implements Queue.Executable {
         } else {
           LOGGER.log(Level.INFO, "Skipping deletion of the backup at " + shelvedProjectArchiveName);
         }
-        Jenkins.getInstance().reload();
+        Jenkins.get().reload();
       } catch (Exception e) {
         LOGGER.log(Level.SEVERE, "Could not unarchive project archive [" + shelvedProjectArchiveName + "].", e);
       }
@@ -72,7 +74,7 @@ public class UnshelveProjectExecutable implements Queue.Executable {
   }
 
   private boolean explode(File shelvedProjectArchive) throws IOException, InterruptedException {
-    File rootDir = Jenkins.getInstance().getRootDir();
+    File rootDir = Jenkins.get().getRootDir();
     Properties metadata = ShelvedProject.loadMetadata(shelvedProjectArchive);
     String projectPathProperty = metadata.getProperty(PROJECT_PATH_PROPERTY);
     Path projectPath = rootDir.toPath().resolve("jobs").resolve(projectPathProperty);
@@ -88,7 +90,7 @@ public class UnshelveProjectExecutable implements Queue.Executable {
 
   private void legacyExplode(File shelvedProjectArchive) throws IOException, InterruptedException {
     new FilePath(shelvedProjectArchive).unzip(
-            new FilePath(new File(Jenkins.getInstance().getRootDir(), "jobs")));
+            new FilePath(new File(Jenkins.get().getRootDir(), "jobs")));
   }
 
 
