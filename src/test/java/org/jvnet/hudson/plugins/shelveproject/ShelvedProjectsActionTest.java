@@ -4,36 +4,40 @@ import hudson.model.Hudson;
 import hudson.model.Item;
 import hudson.model.User;
 import hudson.security.ACL;
+import hudson.security.ACLContext;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
-
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({"ResultOfMethodCallIgnored"})
-public class ShelvedProjectsActionTest {
-    @Rule
-    public JenkinsRule jenkinsRule = new JenkinsRule();
+@WithJenkins
+class ShelvedProjectsActionTest {
 
     private ShelvedProjectsAction shelvedProjectsAction;
     private File shelvedProjectsDir;
 
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp(JenkinsRule jenkinsRule) {
         shelvedProjectsAction = new ShelvedProjectsAction();
-        shelvedProjectsDir = new File(Hudson.getInstance().getRootDir(), "shelvedProjects");
+        shelvedProjectsDir = new File(Hudson.get().getRootDir(), "shelvedProjects");
         shelvedProjectsDir.mkdirs();
         jenkinsRule.jenkins.setSecurityRealm(jenkinsRule.createDummySecurityRealm());
         jenkinsRule.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy().
@@ -41,63 +45,68 @@ public class ShelvedProjectsActionTest {
                 grant(Jenkins.READ, Item.DELETE).everywhere().to("developer").
                 grant(Jenkins.READ, Item.CREATE).everywhere().to("creator").
                 grant(Jenkins.READ).everywhere().to("reader"));
-        ACL.as(User.get("admin"));
+        ACL.as2(User.get("admin", true, new HashMap<>()).impersonate2());
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         shelvedProjectsDir.delete();
     }
 
     @Test
-    public void testGetShelvedProjects_shouldReturnEmptyListWhenNoArchivedProjectsFound() {
-        assertTrue("No archived projects should have been found.",
-                shelvedProjectsAction.getShelvedProjects().isEmpty());
+    void testGetShelvedProjects_shouldReturnEmptyListWhenNoArchivedProjectsFound() {
+        assertTrue(shelvedProjectsAction.getShelvedProjects().isEmpty(),
+                "No archived projects should have been found.");
     }
 
     @Test
-    public void testGetShelvedProjects_shouldReturnShelvedProject() throws IOException {
+    void testGetShelvedProjects_shouldReturnShelvedProject() throws IOException {
         FileUtils.touch(new File(shelvedProjectsDir, "blackMesaProject-1262634114828.zip"));
 
         List<ShelvedProject> shelvedProjects = shelvedProjectsAction.getShelvedProjects();
 
-        assertEquals("Should have found one archived projects.", 1, shelvedProjects.size());
-        assertEquals("Should have found one archived projects.", "blackMesaProject",
-                shelvedProjects.get(0).getProjectName());
-        assertEquals("Should have found one archived projects.", 1262634114828L,
-                shelvedProjects.get(0).getTimestamp());
-        assertEquals("Should have found one archived projects.", "blackMesaProject-1262634114828.zip",
-                shelvedProjects.get(0).getArchive().getName());
-        assertNotNull("Should have set formatted date.", shelvedProjects.get(0).getFormatedDate());
+        assertEquals(1, shelvedProjects.size(), "Should have found one archived projects.");
+        assertEquals("blackMesaProject",
+                shelvedProjects.get(0).getProjectName(),
+                "Should have found one archived projects.");
+        assertEquals(1262634114828L,
+                shelvedProjects.get(0).getTimestamp(),
+                "Should have found one archived projects.");
+        assertEquals("blackMesaProject-1262634114828.zip",
+                shelvedProjects.get(0).getArchive().getName(),
+                "Should have found one archived projects.");
+        assertNotNull(shelvedProjects.get(0).getFormatedDate(), "Should have set formatted date.");
     }
 
     @Test
-    public void testGetShelvedProjects_shouldReturnMultipleArchivedProjects()
+    void testGetShelvedProjects_shouldReturnMultipleArchivedProjects()
             throws IOException {
         FileUtils.touch(new File(shelvedProjectsDir, "appretureScience-1262634014828.zip"));
         FileUtils.touch(new File(shelvedProjectsDir, "blackMesaProject-1262634114828.zip"));
 
         List<ShelvedProject> shelvedProjects = shelvedProjectsAction.getShelvedProjects();
 
-        assertEquals("Should have found two archived projects.", 2, shelvedProjects.size());
+        assertEquals(2, shelvedProjects.size(), "Should have found two archived projects.");
     }
 
     @Test
-    public void testGetShelvedProjects_shouldHandleProjectNamesWithHyphens()
+    void testGetShelvedProjects_shouldHandleProjectNamesWithHyphens()
             throws IOException {
         FileUtils.touch(new File(shelvedProjectsDir, "appreture-science-1262634014828.zip"));
 
         List<ShelvedProject> shelvedProjects = shelvedProjectsAction.getShelvedProjects();
 
-        assertEquals("Should have found two archived projects.", 1, shelvedProjects.size());
-        assertEquals("Should have correctly gotten project name, even one with hypens.", "appreture-science",
-                shelvedProjects.get(0).getProjectName());
-        assertEquals("Should have correctly gotten timestamp, even when project name has hypens.", 1262634014828L,
-                shelvedProjects.get(0).getTimestamp());
+        assertEquals(1, shelvedProjects.size(), "Should have found two archived projects.");
+        assertEquals("appreture-science",
+                shelvedProjects.get(0).getProjectName(),
+                "Should have correctly gotten project name, even one with hypens.");
+        assertEquals(1262634014828L,
+                shelvedProjects.get(0).getTimestamp(),
+                "Should have correctly gotten timestamp, even when project name has hypens.");
     }
 
     @Test
-    public void testGetShelvedProjects_shouldSortProjectsByName()
+    void testGetShelvedProjects_shouldSortProjectsByName()
             throws IOException {
         FileUtils.touch(new File(shelvedProjectsDir, "bbb-1111111111111.zip"));
         FileUtils.touch(new File(shelvedProjectsDir, "~aa-1111111111111.zip"));
@@ -108,52 +117,54 @@ public class ShelvedProjectsActionTest {
 
         List<ShelvedProject> shelvedProjects = shelvedProjectsAction.getShelvedProjects();
 
-        assertEquals("Project list should have been sorted alphabetically.",
-                "!aa", shelvedProjects.get(0).getProjectName());
-        assertEquals("Project list should have been sorted alphabetically.",
-                "~aa", shelvedProjects.get(1).getProjectName());
-        assertEquals("Project list should have been sorted alphabetically.",
-                "aaa", shelvedProjects.get(2).getProjectName());
-        assertEquals("Project list should have been sorted alphabetically.",
-                "bbb", shelvedProjects.get(3).getProjectName());
-        assertEquals("Project list should have been sorted alphabetically.",
-                "YYY", shelvedProjects.get(4).getProjectName());
-        assertEquals("Project list should have been sorted alphabetically.",
-                "zzz", shelvedProjects.get(5).getProjectName());
+        assertEquals("!aa", shelvedProjects.get(0).getProjectName(), "Project list should have been sorted alphabetically.");
+        assertEquals("~aa", shelvedProjects.get(1).getProjectName(), "Project list should have been sorted alphabetically.");
+        assertEquals("aaa", shelvedProjects.get(2).getProjectName(), "Project list should have been sorted alphabetically.");
+        assertEquals("bbb", shelvedProjects.get(3).getProjectName(), "Project list should have been sorted alphabetically.");
+        assertEquals("YYY", shelvedProjects.get(4).getProjectName(), "Project list should have been sorted alphabetically.");
+        assertEquals("zzz", shelvedProjects.get(5).getProjectName(), "Project list should have been sorted alphabetically.");
     }
 
     @Issue("JENKINS-55462")
-    @Test(expected = hudson.security.AccessDeniedException3.class)
-    public void testGetShelvedProjectsWithNoAdminRightsShouldThrow() throws IOException {
-        ACL.as(User.get("reader"));
-        FileUtils.touch(new File(shelvedProjectsDir, "one-project.zip"));
-        shelvedProjectsAction.getShelvedProjects();
+    @Test
+    void testGetShelvedProjectsWithNoAdminRightsShouldThrow() throws Exception {
+        try (ACLContext ignored = ACL.as2(User.get("reader", true, new HashMap<>()).impersonate2())) {
+            FileUtils.touch(new File(shelvedProjectsDir, "one-project.zip"));
+            assertThrows(hudson.security.AccessDeniedException3.class, () ->
+                    shelvedProjectsAction.getShelvedProjects());
+        }
     }
 
     @Issue("JENKINS-55462")
-    @Test(expected = hudson.security.AccessDeniedException3.class)
-    public void testGetShelvedProjectsWithOnlyCreateRightsShouldThrow() throws IOException {
-        ACL.as(User.get("creator"));
-        FileUtils.touch(new File(shelvedProjectsDir, "one-project.zip"));
-        shelvedProjectsAction.getShelvedProjects();
+    @Test
+    void testGetShelvedProjectsWithOnlyCreateRightsShouldThrow() throws Exception {
+        try (ACLContext ignored = ACL.as2(User.get("creator", true, new HashMap<>()).impersonate2())) {
+            FileUtils.touch(new File(shelvedProjectsDir, "one-project.zip"));
+            assertThrows(hudson.security.AccessDeniedException3.class, () ->
+                    shelvedProjectsAction.getShelvedProjects());
+        }
     }
 
 
     @Issue("JENKINS-55462")
     @Test
-    public void testUnShelveIconShouldBeVisibleForAdmin() {
-        ACL.as(User.get("admin"));
-        assertNotNull("Shelve icon should be visible", new ShelvedProjectsAction().getIconFileName());
+    void testUnShelveIconShouldBeVisibleForAdmin() {
+        try (ACLContext ignored = ACL.as2(User.get("admin", true, new HashMap<>()).impersonate2())) {
+            assertNotNull(new ShelvedProjectsAction().getIconFileName(), "Shelve icon should be visible");
+        }
     }
 
     @Issue("JENKINS-55462")
     @Test
-    public void testShelveIconShouldNotBeVisibleForOtherUsers() {
-        ACL.as(User.get("developer"));
-        assertNull("Shelve icon should not be visible", new ShelvedProjectsAction().getIconFileName());
-        ACL.as(User.get("creator"));
-        assertNull("Shelve icon should not be visible", new ShelvedProjectsAction().getIconFileName());
-        ACL.as(User.get("reader"));
-        assertNull("Shelve icon should not be visible", new ShelvedProjectsAction().getIconFileName());
+    void testShelveIconShouldNotBeVisibleForOtherUsers() {
+        try (ACLContext ignored = ACL.as2(User.get("developer", true, new HashMap<>()).impersonate2())) {
+            assertNull(new ShelvedProjectsAction().getIconFileName(), "Shelve icon should not be visible");
+        }
+        try (ACLContext ignored = ACL.as2(User.get("creator", true, new HashMap<>()).impersonate2())) {
+            assertNull(new ShelvedProjectsAction().getIconFileName(), "Shelve icon should not be visible");
+        }
+        try (ACLContext ignored = ACL.as2(User.get("reader", true, new HashMap<>()).impersonate2())) {
+            assertNull(new ShelvedProjectsAction().getIconFileName(), "Shelve icon should not be visible");
+        }
     }
 }
