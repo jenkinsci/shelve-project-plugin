@@ -1,5 +1,6 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.Action;
 import hudson.model.Item;
 import hudson.security.Permission;
@@ -20,7 +21,7 @@ public class ShelveProjectAction implements Action {
   private boolean isShelvingProject;
   private static final String ACTION_ICON_PATH = "/plugin/shelve-project-plugin/icons/shelve-project-icon.png";
 
-  public ShelveProjectAction(Item item) {
+  public ShelveProjectAction(@NonNull Item item) {
     this.item = item;
     this.isShelvingProject = false;
   }
