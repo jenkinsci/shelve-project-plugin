@@ -1,6 +1,7 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
 import com.cloudbees.hudson.plugins.folder.AbstractFolder;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import hudson.Plugin;
 import hudson.model.AbstractProject;
@@ -10,15 +11,14 @@ import hudson.model.ItemGroup;
 import hudson.model.Queue;
 import hudson.util.DirScanner;
 import hudson.util.io.ArchiverFactory;
+import java.nio.charset.StandardCharsets;
 import jenkins.model.Jenkins;
 import org.apache.tools.ant.types.selectors.SelectorUtils;
 
-import javax.annotation.Nonnull;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -59,6 +59,7 @@ public class ShelveProjectExecutable implements Queue.Executable {
     this.item = item;
   }
 
+  @NonNull
   public Queue.Task getParent() {
     return parentTask;
   }
@@ -85,14 +86,14 @@ public class ShelveProjectExecutable implements Queue.Executable {
 
     wipeoutWorkspace();
 
-    LOGGER.info("Creating archive for project [" + item.getName() + "].");
+    LOGGER.info("Creating archive for project [" + item.getFullName() + "].");
     try {
       Path projectRootPath = item.getRootDir().toPath();
       List<String> regexp = createListOfFoldersToBackup();
       regexp.add(relativizeToJenkinsJobsDirectory(projectRootPath) + "/**/*");
       long archiveTime = System.currentTimeMillis();
       String backupBaseName = item.getName() + "-" + archiveTime;
-      Path rootPath = Jenkins.getInstance().getRootDir().toPath();
+      Path rootPath = Jenkins.get().getRootDir().toPath();
       Path shelvedProjectRoot = rootPath.resolve(ShelvedProjectsAction.SHELVED_PROJECTS_DIRECTORY);
       if (!Files.exists(shelvedProjectRoot)) {
         Files.createDirectory(shelvedProjectRoot);
@@ -100,13 +101,13 @@ public class ShelveProjectExecutable implements Queue.Executable {
       buildMetadataFile(shelvedProjectRoot, backupBaseName, archiveTime);
       // use a tar because of https://github.com/jenkinsci/jenkins/pull/2639 when using ant includes.
       // and this will also fix https://issues.jenkins-ci.org/browse/JENKINS-10986.
-      // keeping the filename formatted as before, if external scripts depend on it they won't be broken
+      // keeping the filename formatted as before, if external scripts depend on it, they won't be broken
       Path archivePath = Files.createFile(shelvedProjectRoot.resolve(backupBaseName + "." + ARCHIVE_FILE_EXTENSION));
       FilePath destinationPath = new FilePath(archivePath.toFile());
       tar(new FilePath(getJenkinsJobsDirectory()), destinationPath, String.join(",", regexp), buildExclusionGlob());
       return true;
     } catch (IOException | InterruptedException e) {
-      LOGGER.log(Level.SEVERE, "Could not archive project [" + item.getName() + "].", e);
+      LOGGER.log(Level.SEVERE, "Could not archive project [" + item.getFullName() + "].", e);
       return false;
     }
   }
@@ -118,19 +119,19 @@ public class ShelveProjectExecutable implements Queue.Executable {
   private void buildMetadataFile(Path shelvedProjectRoot, String backupBaseName, long archiveTime) throws IOException {
     Path archivePath = Files.createFile(shelvedProjectRoot.resolve(backupBaseName + "." + METADATA_FILE_EXTENSION));
     Path projectRootPath = item.getRootDir().toPath();
-    try (BufferedWriter writer = Files.newBufferedWriter(archivePath, Charset.forName("UTF-8"))) {
+    try (BufferedWriter writer = Files.newBufferedWriter(archivePath, StandardCharsets.UTF_8)) {
       addNewProperty(writer, PROJECT_PATH_PROPERTY, escapeForPropertiesFile(relativizeToJenkinsJobsDirectory(projectRootPath)));
       addNewProperty(writer, PROJECT_NAME_PROPERTY, item.getName());
       addNewProperty(writer, ARCHIVE_TIME_PROPERTY, Long.toString(archiveTime));
       addNewProperty(writer, PROJECT_FULL_NAME_PROPERTY, item.getFullName());
       addNewProperty(writer, ARCHIVE_COMPRESSION, "true");
     } catch (IOException e) {
-      LOGGER.log(Level.SEVERE, "Could not write metadata for project [" + item.getName() + "].", e);
+      LOGGER.log(Level.SEVERE, "Could not write metadata for project [" + item.getFullName() + "].", e);
       throw e;
     }
   }
 
-  private static String escapeForPropertiesFile(@Nonnull String path) {
+  private static String escapeForPropertiesFile(@NonNull String path) {
     // Windows is using \ while it's an escape character in properties files
     return path.replaceAll("\\\\", java.util.regex.Matcher.quoteReplacement("\\\\"));
   }
@@ -149,16 +150,16 @@ public class ShelveProjectExecutable implements Queue.Executable {
 
   private List<String> createListOfFoldersToBackup() {
     List<String> regexp = new ArrayList<>();
-    Plugin folderPlugin = Jenkins.getInstance().getPlugin("cloudbees-folder");
+    Plugin folderPlugin = Jenkins.get().getPlugin("cloudbees-folder");
     if (folderPlugin != null && folderPlugin.getWrapper().isActive()) {
-      ItemGroup parent = item.getParent();
+      ItemGroup<?> parent = item.getParent();
       // technically not using Folder plugin code, but in practice, the Folder plugin code should be there for this
       // situation to occur.
-      while (parent instanceof AbstractFolder) {
+      while (parent instanceof AbstractFolder<?> af) {
         LOGGER.log(Level.INFO, "Archiving parent folder: " + parent.getFullName());
         Path absoluteFolderConfigPath = parent.getRootDir().toPath().resolve("config.xml");
         regexp.add(relativizeToJenkinsJobsDirectory(absoluteFolderConfigPath));
-        parent = ((AbstractFolder) parent).getParent();
+        parent = af.getParent();
       }
     }
     return regexp;
@@ -169,32 +170,32 @@ public class ShelveProjectExecutable implements Queue.Executable {
   }
 
   private File getJenkinsJobsDirectory() {
-    return new File(Jenkins.getInstance().getRootDir(), "jobs");
+    return new File(Jenkins.get().getRootDir(), "jobs");
   }
 
   private void wipeoutWorkspace() {
-    LOGGER.info("Wiping out workspace for project [" + item.getName() + "].");
+    LOGGER.info("Wiping out workspace for project [" + item.getFullName() + "].");
     try {
-      if (item instanceof AbstractProject) {
-        ((AbstractProject) item).doDoWipeOutWorkspace();
+      if (item instanceof AbstractProject<?, ?> ap) {
+        ap.doDoWipeOutWorkspace();
       }
       // there is no API to do this in the case of Pipelines: https://issues.jenkins-ci.org/browse/JENKINS-26138
     } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Could not wipeout workspace [" + item.getName() + "].", e);
+      LOGGER.log(Level.SEVERE, "Could not wipeout workspace [" + item.getFullName() + "].", e);
     }
   }
 
   private void deleteProject() {
-    LOGGER.info("Deleting project [" + item.getName() + "].");
+    LOGGER.info("Deleting project [" + item.getFullName() + "].");
     try {
       item.delete();
     } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Could not delete project [" + item.getName() + "].", e);
+      LOGGER.log(Level.SEVERE, "Could not delete project [" + item.getFullName() + "].", e);
     }
   }
 
   @Override
   public String toString() {
-    return "Shelving " + item.getName();
+    return "Shelving " + item.getFullName();
   }
 }

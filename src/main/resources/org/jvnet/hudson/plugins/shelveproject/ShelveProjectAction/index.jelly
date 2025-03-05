@@ -12,11 +12,11 @@
             <br/>
             <b>When shelving a folder, make sure not to shelve one of its child projects at the same time to avoid discrepancies.</b>
 
-            <div align="right">
+            <f:bottomButtonBar>
                 <form method="post" action="shelveProject">
-                    <input type="submit" value="Shelve Project" class="submit-button"/>
+                  <button type="submit" class="jenkins-button jenkins-button--primary">${%Shelve Project}</button>
                 </form>
-            </div>
+            </f:bottomButtonBar>
         </l:main-panel>
     </l:layout>
 
