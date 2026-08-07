@@ -5,7 +5,6 @@ import hudson.model.Queue;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -15,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.jvnet.hudson.plugins.shelveproject.ShelveProjectExecutable.ARCHIVE_FILE_EXTENSION;
+import java.util.Objects;
 
 /**
  * A {@link Queue.Executable} that will take care of removing the provided shelvedProjects/
@@ -67,7 +67,7 @@ public class DeleteProjectExecutable implements Queue.Executable {
         File shelvedProjectsDirectory = new File(Jenkins.get().getRootDir(), ShelvedProjectsAction.SHELVED_PROJECTS_DIRECTORY);
         Collection<File> files = FileUtils.listFiles(shelvedProjectsDirectory, null, false);
         for (File file : files) {
-            if (StringUtils.equals(file.getName(), shelvedProjectArchiveName)) {
+            if (Objects.equals(file.getName(), shelvedProjectArchiveName)) {
                 return file;
             }
         }
