@@ -1,26 +1,26 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.AbstractItem;
 import hudson.model.Action;
 import hudson.model.Item;
 import hudson.security.Permission;
-import jakarta.servlet.ServletException;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.verb.POST;
 
-import java.io.IOException;
 import java.util.logging.Logger;
 
 public class ShelveProjectAction implements Action {
   private final static Logger LOGGER = Logger.getLogger(ShelveProjectAction.class.getName());
   private static final Permission SHELVE_PERMISSION = Item.DELETE;
+  @NonNull
   private Item item;
 
   private boolean isShelvingProject;
 
-  public ShelveProjectAction(Item item) {
+  public ShelveProjectAction(@NonNull Item item) {
     this.item = item;
     this.isShelvingProject = false;
   }
@@ -31,7 +31,7 @@ public class ShelveProjectAction implements Action {
   }
 
   private String getShelveIconPath(Item item) {
-    return item != null && item.hasPermission(SHELVE_PERMISSION) ? "symbol-file-tray-stacked-outline plugin-ionicons-api" : null;
+    return item.hasPermission(SHELVE_PERMISSION) ? "symbol-file-tray-stacked-outline plugin-ionicons-api" : null;
   }
 
   public String getDisplayName() {
@@ -45,6 +45,7 @@ public class ShelveProjectAction implements Action {
     return "shelve";
   }
 
+  @NonNull
   public Item getItem() {
     return item;
   }
@@ -55,13 +56,8 @@ public class ShelveProjectAction implements Action {
 
   @SuppressWarnings({"UnusedDeclaration"})
   @POST
-  public HttpResponse doShelveProject()
-          throws IOException, ServletException {
-    if (getItem() != null) {
-      getItem().checkPermission(Item.DELETE);
-    } else{
-      throw new ServletException();
-    }
+  public HttpResponse doShelveProject() {
+    getItem().checkPermission(Item.DELETE);
 
     if (!isShelvingProject()) {
       LOGGER.info("Shelving project [" + getItem().getFullName() + "].");
