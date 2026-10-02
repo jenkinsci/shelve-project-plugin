@@ -1,5 +1,6 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.AbstractItem;
 import hudson.model.Action;
 import hudson.model.Item;
@@ -14,22 +15,23 @@ import java.util.logging.Logger;
 public class ShelveProjectAction implements Action {
   private final static Logger LOGGER = Logger.getLogger(ShelveProjectAction.class.getName());
   private static final Permission SHELVE_PERMISSION = Item.DELETE;
+  @NonNull
   private Item item;
 
   private boolean isShelvingProject;
 
-  public ShelveProjectAction(Item item) {
+  public ShelveProjectAction(@NonNull Item item) {
     this.item = item;
     this.isShelvingProject = false;
   }
 
   @Override
   public String getIconFileName() {
-    return getShelveIconPath();
+    return getShelveIconPath(getItem());
   }
 
-  private static String getShelveIconPath() {
-    return Jenkins.get().hasPermission(SHELVE_PERMISSION) ? "symbol-file-tray-stacked-outline plugin-ionicons-api" : null;
+  private String getShelveIconPath(Item item) {
+    return item.hasPermission(SHELVE_PERMISSION) ? "symbol-file-tray-stacked-outline plugin-ionicons-api" : null;
   }
 
   public String getDisplayName() {
@@ -43,6 +45,7 @@ public class ShelveProjectAction implements Action {
     return "shelve";
   }
 
+  @NonNull
   public Item getItem() {
     return item;
   }
@@ -54,7 +57,8 @@ public class ShelveProjectAction implements Action {
   @SuppressWarnings({"UnusedDeclaration"})
   @POST
   public HttpResponse doShelveProject() {
-    Jenkins.get().checkPermission(Item.DELETE);
+    getItem().checkPermission(Item.DELETE);
+
     if (!isShelvingProject()) {
       LOGGER.info("Shelving project [" + getItem().getFullName() + "].");
       // Shelving the project could take some time, so add it as a task
