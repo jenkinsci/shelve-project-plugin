@@ -4,7 +4,6 @@ import hudson.Extension;
 import hudson.model.RootAction;
 import hudson.security.Permission;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.HttpRedirect;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.StaplerRequest2;
@@ -98,9 +97,9 @@ public class ShelvedProjectsAction implements RootAction {
 
     private ShelvedProject getLegacyShelvedProjectFromArchive(File archive) {
         ShelvedProject shelvedProject = new ShelvedProject();
-        shelvedProject.setProjectName(StringUtils.substringBeforeLast(archive.getName(), "-"));
+        shelvedProject.setProjectName(substringBeforeLast(archive.getName(), "-"));
         shelvedProject.setTimestamp(Long.parseLong(
-                StringUtils.substringBefore(StringUtils.substringAfterLast(archive.getName(), "-"), ".")));
+                substringBefore(substringAfterLast(archive.getName(), "-"), ".")));
         shelvedProject.setArchive(archive);
         shelvedProject.setFormatedDate(formatDate(shelvedProject.getTimestamp()));
         return shelvedProject;
@@ -160,4 +159,23 @@ public class ShelvedProjectsAction implements RootAction {
     private HttpRedirect createRedirectToMainPage() {
         return new HttpRedirect(Jenkins.get().getRootUrl());
     }
+
+    /** Everything before the last {@code separator}, or the whole string when it is absent. */
+    private static String substringBeforeLast(String str, String separator) {
+        int index = str.lastIndexOf(separator);
+        return index < 0 ? str : str.substring(0, index);
+    }
+
+    /** Everything after the last {@code separator}, or an empty string when it is absent. */
+    private static String substringAfterLast(String str, String separator) {
+        int index = str.lastIndexOf(separator);
+        return index < 0 ? "" : str.substring(index + separator.length());
+    }
+
+    /** Everything before the first {@code separator}, or the whole string when it is absent. */
+    private static String substringBefore(String str, String separator) {
+        int index = str.indexOf(separator);
+        return index < 0 ? str : str.substring(0, index);
+    }
+
 }
