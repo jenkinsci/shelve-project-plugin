@@ -1,16 +1,15 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.*;
 import hudson.model.queue.CauseOfBlockage;
 import hudson.model.queue.SubTask;
 import hudson.security.ACL;
-import org.acegisecurity.Authentication;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import org.springframework.security.core.Authentication;
 
 public class ShelveProjectTask implements Queue.FlyweightTask, Queue.TransientTask {
   private final Item item;
@@ -19,50 +18,25 @@ public class ShelveProjectTask implements Queue.FlyweightTask, Queue.TransientTa
     this.item = project;
   }
 
-  public Label getAssignedLabel() {
-    return null;
-  }
-
-  public Node getLastBuiltOn() {
-    return null;
-  }
-
-  public boolean isBuildBlocked() {
-    return item instanceof Queue.Task && ((Queue.Task) item).isBuildBlocked();
-  }
-
-  @SuppressWarnings("deprecation")
-  public String getWhyBlocked() {
-    return item instanceof Queue.Task ? ((Queue.Task) item).getWhyBlocked() : "";
-  }
-
   public CauseOfBlockage getCauseOfBlockage() {
-    return item instanceof Queue.Task ? ((Queue.Task) item).getCauseOfBlockage() : null;
+    return item instanceof Queue.Task qt ? qt.getCauseOfBlockage() : null;
   }
 
   public String getName() {
-    return "Shelving " + item.getName();
+    return "Shelving " + item.getFullName();
   }
 
   public String getFullDisplayName() {
     return getName();
   }
 
-  public long getEstimatedDuration() {
-    return -1;
-  }
-
-  public Queue.Executable createExecutable()
-          throws IOException {
+  public Queue.Executable createExecutable() {
     return new ShelveProjectExecutable(this, item);
   }
 
+  @NonNull
   public Queue.Task getOwnerTask() {
     return this;
-  }
-
-  public Object getSameNodeConstraint() {
-    return null;
   }
 
   public void checkAbortPermission() {
@@ -77,32 +51,25 @@ public class ShelveProjectTask implements Queue.FlyweightTask, Queue.TransientTa
     return item.getUrl();
   }
 
-  public boolean isConcurrentBuild() {
-    return false;
-  }
-
   public Collection<? extends SubTask> getSubTasks() {
-    final List<SubTask> subTasks = new LinkedList<SubTask>();
+    final List<SubTask> subTasks = new LinkedList<>();
     subTasks.add(this);
     return subTasks;
-  }
-
-  public ResourceList getResourceList() {
-    return ResourceList.EMPTY;
   }
 
   public String getDisplayName() {
     return getName();
   }
 
-  @Nonnull
-  public Authentication getDefaultAuthentication() {
-    return ACL.SYSTEM;
+  @NonNull
+  @Override
+  public Authentication getDefaultAuthentication2() {
+    return ACL.SYSTEM2;
   }
 
-  @Nonnull
+  @NonNull
   @Override
-  public Authentication getDefaultAuthentication(Queue.Item item) {
-    return getDefaultAuthentication();
+  public Authentication getDefaultAuthentication2(Queue.Item item) {
+    return getDefaultAuthentication2();
   }
 }

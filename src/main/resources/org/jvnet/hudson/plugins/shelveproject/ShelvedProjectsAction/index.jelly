@@ -3,35 +3,31 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <l:layout title="Shelved Projects">
         <l:main-panel>
-            <h1>Shelved Projects</h1>
-
-            <p>Jenkins' configuration will be reloaded automatically when unshelving a project (this will not impact
-                any running jobs). You may need to reload your browser to see the project restored.</p>
-            
-            <p>
+            <l:app-bar title="${%Shelved Projects}"/>
             <j:set var="shelvedProjectsList" value="${it.shelvedProjects}"/>
-            <j:choose>
-                <j:when test="${!shelvedProjectsList.isEmpty()}">
-                    <form method="post" action="manageShelvedProject">
-                        <ol>
+            <p>
+                <j:choose>
+                    <j:when test="${!shelvedProjectsList.isEmpty()}">
+                        Jenkins' configuration will be reloaded automatically when unshelving a project (this will not impact
+                        any running jobs). You may need to reload your browser to see the project restored.
+                        <form method="post" action="manageShelvedProject">
                             <j:forEach var="shelvedProject" items="${shelvedProjectsList}">
-                                <input type="checkbox" name="archives" value="${shelvedProject.archive.name}"/>
-                                ${shelvedProject.projectName} (archived on ${shelvedProject.formatedDate})<br/> 
+                              <f:entry title="${shelvedProject.projectName} (archived on ${shelvedProject.formatedDate})">
+                                <f:checkbox name="archives" value="${shelvedProject.archive.name}"/>
+                              </f:entry>
                             </j:forEach>
-                        </ol>
 
-                        <div align="right">
-                            <input type="submit" name="unshelve" value="Unshelve Project" class="submit-button"/>
-                            <input type="submit" name="delete" value="Delete Project" class="submit-button"/>
-                        </div>
-                    </form>
-                </j:when>
-                <j:otherwise>
-                    There are no shelved projects.
-                </j:otherwise>
-            </j:choose>
+                            <f:bottomButtonBar>
+                                <button type="submit" name="unshelve" class="jenkins-button jenkins-button--primary">${%Unshelve Project}</button>
+                                <button type="submit" name="delete" class="jenkins-button jenkins-button--primary">${%Delete Project}</button>
+                            </f:bottomButtonBar>
+                        </form>
+                    </j:when>
+                    <j:otherwise>
+                        There are no shelved projects.
+                    </j:otherwise>
+                </j:choose>
             </p>
-            
         </l:main-panel>
     </l:layout>
 </j:jelly>

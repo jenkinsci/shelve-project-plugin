@@ -1,11 +1,11 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.Action;
 import hudson.model.Item;
 import jenkins.model.TransientActionFactory;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -21,9 +21,9 @@ public class ShelveProjectActionFactory extends TransientActionFactory<Item> {
     return Item.class;
   }
 
-  @Nonnull
+  @NonNull
   @Override
-  public Collection<? extends Action> createFor(@Nonnull Item target) {
+  public Collection<? extends Action> createFor(@NonNull Item target) {
     return Collections.singleton(new ShelveProjectAction(target));
   }
 }

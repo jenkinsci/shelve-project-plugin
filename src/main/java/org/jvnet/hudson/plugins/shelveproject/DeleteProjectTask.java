@@ -1,20 +1,17 @@
 package org.jvnet.hudson.plugins.shelveproject;
 
-import hudson.model.Label;
-import hudson.model.Node;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.Queue;
 import hudson.model.ResourceList;
 import hudson.model.queue.CauseOfBlockage;
 import hudson.model.queue.SubTask;
 import hudson.security.ACL;
-import org.acegisecurity.Authentication;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import org.springframework.security.core.Authentication;
 
 /**
  * Represents a lightweight task that will take care of Deleting shelved archives.
@@ -33,22 +30,6 @@ public class DeleteProjectTask implements Queue.FlyweightTask, Queue.TransientTa
                 Arrays.copyOf(shelvedProjectArchiveNames, shelvedProjectArchiveNames.length) : null;
     }
 
-    public Label getAssignedLabel() {
-        return null;
-    }
-
-    public Node getLastBuiltOn() {
-        return null;
-    }
-
-    public boolean isBuildBlocked() {
-        return false;
-    }
-
-    public String getWhyBlocked() {
-        return null;
-    }
-
     public CauseOfBlockage getCauseOfBlockage() {
         return null;
     }
@@ -61,21 +42,13 @@ public class DeleteProjectTask implements Queue.FlyweightTask, Queue.TransientTa
         return getName();
     }
 
-    public long getEstimatedDuration() {
-        return -1;
-    }
-
-    public Queue.Executable createExecutable()
-            throws IOException {
+    public Queue.Executable createExecutable() {
         return new DeleteProjectExecutable(this, shelvedProjectArchiveNames);
     }
 
+    @NonNull
     public Queue.Task getOwnerTask() {
         return this;
-    }
-
-    public Object getSameNodeConstraint() {
-        return null;
     }
 
     public void checkAbortPermission() {
@@ -89,12 +62,8 @@ public class DeleteProjectTask implements Queue.FlyweightTask, Queue.TransientTa
         return null;
     }
 
-    public boolean isConcurrentBuild() {
-        return false;
-    }
-
     public Collection<? extends SubTask> getSubTasks() {
-        final List<SubTask> subTasks = new LinkedList<SubTask>();
+        final List<SubTask> subTasks = new LinkedList<>();
         subTasks.add(this);
         return subTasks;
     }
@@ -107,15 +76,15 @@ public class DeleteProjectTask implements Queue.FlyweightTask, Queue.TransientTa
         return getName();
     }
 
-    @Nonnull
-    public Authentication getDefaultAuthentication() {
-        return ACL.SYSTEM;
+    @NonNull
+    public Authentication getDefaultAuthentication2() {
+        return ACL.SYSTEM2;
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public Authentication getDefaultAuthentication(Queue.Item item) {
-        return getDefaultAuthentication();
+    public Authentication getDefaultAuthentication2(Queue.Item item) {
+        return getDefaultAuthentication2();
     }
 
 }
