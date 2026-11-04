@@ -23,6 +23,7 @@
     <jenkins.version>${jenkins.baseline}.1</jenkins.version>
     <slf4jVersion>1.7.30</slf4jVersion>
     <ban-commons-lang-2.skip>false</ban-commons-lang-2.skip>
+    <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
   </properties>
 
   <dependencies>
